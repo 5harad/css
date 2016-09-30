@@ -1,0 +1,3 @@
+[submodule "crash-courses"]
+	path = crash-courses
+	url = git@github.com:jongbinjung/mse231-workshop.git
