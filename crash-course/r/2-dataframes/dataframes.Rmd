@@ -1,0 +1,830 @@
+---
+title: "`R` crash course - Data frames"
+author: "Jongbin Jung"
+date: "October 2, 2016"
+output:
+  beamer_presentation:
+    fig_height: 3
+    fig_width: 3
+    fonttheme: professionalfonts
+    highlight: zenburn
+    theme: boxes
+---
+
+## Dependencies
+- Latest version ($\ge$ `3.1.2`) of `R`  
+  (*free* from <https://www.r-project.org/>)
+- Latest version of `Rstudio` 
+  (also *free* from <https://www.rstudio.com/>)
+- A bunch of *free* packages
+
+```{r, eval=FALSE}
+install.packages('dplyr')
+install.packages('tidyr')
+install.packages('nycflights13')  # sample data frame
+```
+```{r, echo=FALSE, results='hide', message=FALSE}
+options(width=50)
+library('dplyr', 'tidyr')
+```
+
+## Data Frames: Introduction
+- Data frames are the primary representation of data in `R`
+- You can think of a data frame as a two-dimensional *table* of data
+- It helps your sanity to always think of data frames as a table where
+```
+Each column represents a variable/feature
+Each row represents an observation/instance
+```
+
+- Conceptually, a data frame is also a collection of vectors, i.e., 
+each column is a vector that belongs to the (parent) data frame
+- The fastest path to achieving `R`-ninja status is to get familiar with 
+data frames
+
+## Data Frames: First Impression
+- Let's load an existing data frame to take a look at
+```{r, eval=FALSE}
+# install data package (only need to do once)
+install.packages('nycflights13')
+```
+
+```{r}
+# load data package to workspace
+library('nycflights13')
+```
+- The `nycflights13` package contains a single data frame named `flights`
+- Contains data (16 variables) on all 336,776 flights that departed NYC 
+(i.e. JFK, LGA, or EWR) in 2013
+- See documentation for details on what the 16 variables are
+```{r, eval=FALSE}
+?flights
+```
+
+## Data Frames: First Impression (cont'd)
+```{r, echo=FALSE}
+flights <- tbl_df(flights)
+```
+```{r}
+head(flights)  # take a peek at the data frame
+```
+
+## Some Question
+- What questions could you ask (and answer) with this data?
+    - how many flights were there each day?
+    - what was the mean departure delay for flights every month/day?
+    - what is the proportion of annual departures from each of the three airports?
+    - what else?
+
+- By the end of this session, we'll have the tools to answer most (if not all) 
+of the questions you can come up with!
+
+# Data Frame Basics
+
+## Simple Example
+- Use `data.frame()` function to create a data frame
+- Arguments of `data.frame()` are vectors (of equal length) that constitute each 
+column (variable)
+- For example, let's create a data frame of the following table:
+
+Age | Personality | Income 
+--- | ----------- | ------
+24  | Good        | 2000
+22  | Bad         | 5800
+23  | Good        | 4200
+25  | Bad         | 1500
+22  | Good        | 6000
+
+## Simple Example (cont'd)
+- We'll save the data frame to an object (I'll call mine `data`)
+```{r}
+data <- data.frame(  # start the data.frame() 
+    age = c(24, 22, 23, 25, 22),  
+    personality = c('g', 'b', 'g', 'b', 'g'),
+    income = c(2000, 5800, 4200, 1500, 6000)
+)  # finish the data.frame() function
+```
+- Note that the new lines are just a matter of coding style, i.e., it makes the 
+code easier to read
+- The same data frame can be created in a single line:
+```{r, eval=FALSE}
+data <- data.frame(age = c(24, 22, 23, 25, 22), 
+personality = c('g', 'b', 'g', 'b', 'g'), income
+= c(2000, 5800, 4200, 1500, 6000))
+```
+
+## Simple Example (cont'd)
+- Let's take a look at our new data frame
+```{r}
+data
+```
+
+## Indexing: The `$` Operator
+- The `$` operator lets you reference elements of an object (e.g., column 
+vectors of a data frame) in `R`
+```{r}
+data$age
+data$personality
+```
+- Similar to a `.` operation in other programming languages (but note that `.` 
+has no special meaning in `R`!)
+
+## Indexing: Numeric Row/Column
+- Since a data frame is a table of data, you can treat it like a matrix, and 
+index its entries by `[row #, col #]` notation
+```{r}
+data[2, 3]  # item in row 2 column 3
+data[, 2]  # entire column 2
+data[4, ]  # entire row 4
+```
+
+## Indexing: Named Variables
+- Since the columns represent variables with names, you can index columns by a 
+string representing variable names
+```{r}
+data[, 'age']  # entire 'age' column
+# entries 3~5 of 'personality' column
+data[3:5, 'personality']
+```
+
+## Indexing: Vectors
+- As with vectors/matrices, you can index a data frame with vectors 
+(either numeric or string)
+```{r}
+data[1:3, c('age', 'income')]
+data[c(1,4), 2:3]
+```
+
+## Conditional Indexing
+- Pick-out entries that match specific criteria by first creating a binary 
+vector for indexing
+```{r}
+# find the 22-year-olds
+ind <- data$age == 22
+data[ind, ]  # index rows by binary vector ind
+```
+
+## Chained Indexing
+- Note that 
+    - when you index rows of a single column, the result is a vector
+    - when you index multiple columns, the result is a new data frame
+- You can chain indices to pin-point elements of a data frame
+- For example, all of the following operations are equivalent
+```{r, eval=FALSE}
+# Equivalent operations to get the age of 
+# third observation (row 3)
+data[3, 1]  # if you know that 'age' is column 1
+data[3, 'age']
+data[3,]$age  # get 'age' of row 3
+data$age[3]  # get third observation of 'age' variable
+```
+ 
+## Column (Variable) Names
+- To see the column name of a data frame, use the `colnames()` function
+- The column names can be changed by directly assigning a new vector of names 
+to the `colnames()` function
+```{r}
+colnames(data)
+colnames(data) <- c('age', 'attitude', 'income')
+data
+```
+
+## Write Data Frames to Files
+- Use `write.table()` to write data frames to (text) files
+- The syntax is
+```
+write.table(x, file = "", append = FALSE, 
+    quote = TRUE, sep = " ", 
+    row.names = TRUE, col.names = TRUE)
+```
+- For example, to save our sample data to a file named `data.tsv` with the 
+entries of each row separated by a tab character, write
+```{r, eval=FALSE}
+write.table(data, file='data.tsv', sep='\t', 
+    row.names=FALSE)  # row names are rarely needed 
+```
+- Recall, the default directory is the current working directory, specified with 
+`setwd()`, and retrieved with `getwd()`
+- For more options, see documentation
+```{r, eval=FALSE}
+?write.table
+```
+
+## Read Data Frames from Files
+- To read data frames that exist as text files, use the general `read.table()` 
+function
+- Note that specific options for `read.table()` will depend on the structure of 
+the text file you wish to read (e.g., comma-separated or tab-separated)
+- For example, to read the file we just saved, 
+```{r, eval=FALSE}
+data <- read.table('data.tsv', header=TRUE, sep='\t')
+```
+- Some shortcuts for pre-defined (commonly used) formats
+```{r, eval=FALSE}
+read.csv(file)  # comma-separated values (.csv)
+read.delim(file)  # tab-separated values (.tsv)
+```
+- See the documentation for more details
+```{r, eval=FALSE}
+?read.table
+```
+
+## Read Data from Online Database
+- `read.table()` can also load data frames from an online database
+- While loading data directly from the web is not recommended, this can be 
+useful when making a local copy of an online database
+- For example, to make a local copy of the dataset saved in 
+`https://goo.gl/MGzatX`
+```{r, eval=FALSE}
+address <- 'https://goo.gl/MGzatX'
+data <- read.table(address, header=TRUE)
+write.table(data, file='data.tsv', sep='\t')
+```
+- Note that you can read data in one format (e.g., comma-separated) and save 
+the local copy in another (e.g., tab-separated)
+
+# Exploring Data Frames
+
+## Example Data
+- We'll use a sample dataset from `https://goo.gl/epWdDj`
+- First, load the data into your workspace
+```{r, cache=TRUE}
+address <- 'https://goo.gl/epWdDj'
+autompg <- read.table(address, header=TRUE)
+```
+- The data contains fuel consumption data of 398 vehicles 
+- Originally from the [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml/)
+- See documentation [here](http://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.names)
+    - http://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.names
+
+## Display Structure with `str()`
+- The `str()` function is useful for exploring the overall structure of a 
+data frame
+```{r, eval=FALSE}
+str(autompg)
+```
+```{r, echo=FALSE}
+str(autompg, strict.width='cut')
+```
+
+## `Factor`s
+- Note that some variables are `factor`s
+- A `factor` is a data frame representation of categorical variables
+- The entries of a `factor` variable is defined by `levels`
+```{r, eval=FALSE}
+levels(autompg$make)
+```
+- Use `unique()` to list the unique values of any variable
+```{r}
+unique(autompg$year)
+```
+- Use `factor()` to make a factor varaible from non-factor variables
+```{r}
+autompg$year <- factor(autompg$year)
+```
+
+## Basic `plot`s
+- Use `plot()` to generate quick and dirty (but often helpful) plots
+- By default, `plot()` will generate histograms of categorical variables 
+(`factor`s) and scatter plots (with respect to row index) of continuous 
+variables
+```{r, fig.width=3, fig.height=3, fig.align='center'}
+plot(autompg$year)
+```
+
+## Basic `plot`s (cont'd)
+```{r, fig.align='center'}
+plot(autompg$mpg)
+```
+
+## Basic `plot`s (cont'd)
+- Use syntax `plot(x, y)` to plot two variables
+```{r, fig.align='center'}
+plot(autompg$weight, autompg$mpg)
+```
+
+## Plotting `pairs`
+- To plot more than two variables against each other, use `pairs()`
+```{r, fig.width=2.5, fig.height=2.5, fig.align='center'}
+pairs(autompg[, c('mpg', 'weight', 'year')])
+```
+
+- Note that you can plot the entire data frame with ```pairs(autompg)```
+
+## Data Frame Basics: Exercise
+- From the `autompg` data
+    - create a new data frame with all the buick vehicles (i.e., `make=="buick"`)
+    - generate a `summary()` of the buick vehicles' `mpg`
+    - make the `cylinders` variable of the buick data frame into a factor
+    - plot a histogram of the buick's `cylinders`
+- These are just (very) basic operations
+- For more complicated operations, we'll use `dlyr` and `tidyr` (covered next)
+- For more sophisticated plots, we'll use `ggplot2` (covered in the next session)
+
+# Exercise Solution
+
+## WARNING
+- Solutions to the exercise are presented in the next slide
+- Try the exercise before proceeding!
+
+## Solution
+```{r, fig.align='center', fig.width=2.5, fig.height=2.5}
+buick_index <- autompg$make == 'buick'
+buick <- autompg[buick_index, ]
+summary(buick$mpg)
+buick$cylinders <- factor(buick$cylinders)
+plot(buick$cylinders)
+```
+
+# Munging Data with `dplyr`
+
+## Introduction to `dplyr`
+- `dplyr` is a package that provides a convenient framework (along with a 
+handful of useful functions) for wrangling data (frames)
+- Install and load the `dplyr` package like you would any other `R` package
+```{r, eval=FALSE}
+# Install, if you haven't already.
+# Only need to do this once on a single machine.
+install.packages('dplyr')
+# load package into workspace
+library('dplyr')
+```
+- We'll primarily use the `flights` data frame from the `nycflights13` package 
+in this part
+
+## Verbs
+- A *verb* in the world of `dplyr` is a function that takes a data frame as its 
+first argument, and returns another data frame as a result
+- For example, the `head()` function can be considered a verb
+```{r, eval=FALSE}
+head(flights, n = 10)
+```
+- Note that the result of the `head()` function is another data frame 
+(in this case, with 3 rows)
+- The **core idea of `dplyr`** is that most of your data manipulation needs can 
+be satisfied with 5 basic verbs (or 4, depending on how you categorize them)
+
+## Five basic verbs
+- The five basic verbs of `dplyr` and associated actions are presented below
+
+verb | action
+---- | ------
+`filter()` | select a subset of *rows* by specified conditions
+`select()` | select a subset of *columns* 
+`mutate()` | create a *new column* (often from existing columns)
+`arrange()` | reorder (sort) *rows* by values of specified *column*(s)
+`summarize()` | aggregate values and reduce to single value
+
+- Some verbs have additional options or convenient wrappers
+
+## Selecting Rows: `filter()`
+- Select a subset of *rows*
+- Multiple conditions can be used
+- Use `&` to specify `AND` conditions
+- Use `|` to specify `OR` conditions
+- `AND(&)`/`OR(|)` operations can be used together 
+(where default behavior for multiple conditions is `AND`)
+```{r, eval=FALSE}
+filter(flights, tailnum == 'N14228' & arr_delay > 10)
+filter(flights, 
+       tailnum == 'N14228' |  tailnum == 'N24211')
+filter(flights, 
+       tailnum == 'N14228' |  tailnum == 'N24211', 
+       arr_delay > 10)
+```
+
+## Selecting Rows: `slice()`
+- To select rows by numerical index (position), use `slice()`
+- For example, to select the first 10 rows
+```{r, eval=FALSE}
+slice(flights, 1:10)
+```
+- or to select the last 10 rows
+```{r, eval=FALSE}
+slice(flights, (n() - 9):n())
+```
+- Use `n()` inside a `dplyr` verb to to indicate the *number of rows* of the 
+data frame
+
+## Selecting Columns: `select()`
+- Select a subset of *columns*
+- Either specify the columns that you want to select
+```{r, eval=FALSE}
+select(flights, carrier, tailnum)
+```
+- Or specify the columns you wish to drop
+```{r, eval=FALSE}
+select(flights, -year, -month, -day)
+```
+
+## Selecting Columns: `select()` (cont'd)
+- `dplyr` provides useful helper functions you can use to `select()` columns 
+that match specific criteria such as
+    - `starts_with(x)`: names that start with `x`
+    - `ends_with(x)`: names that end with `x`
+    - `contains(x)`: names that contain `x`
+    - `matches(x)`: names that match the (regular expression) `x`
+- See the documentation for more details
+```{r, eval=FALSE}
+?dplyr::select
+```
+- While you can assign new column names with `select()` the convenience function 
+`rename()` lets you rename columns while retaining the rest of the data frame
+```{r, eval=FALSE}
+select(flights, tail_num = tailnum)
+rename(flights, tail_num = tailnum)
+```
+
+## Create New Columns: `mutate()`
+- Create new columns, usually as a function of existing columns
+- You can refer to new columns you just created, inside the same `mutate()` 
+function
+```{r, eval=FALSE}
+mutate(flights, gain = arr_delay - dep_delay,
+       speed = distance / air_time * 60,
+       # use the gain column we just created
+       # to create yet another gain_per_hour column
+       gain_per_hour = gain / (air_time / 60)
+       )
+```
+- Use `transmute()` to create a new data frame *just from* the new column(s)
+```{r, eval=FALSE}
+transmute(flights, gain = arr_delay - dep_delay)
+```
+
+## Sorting Rows by Column Value: `arrange()`
+- Reorder the rows of a data frame by the specified column's value
+- Multiple conditions are arranged from left to right
+- Use `desc()` to arrange in descending order
+```{r, eval=FALSE}
+arrange(flights, year, month, day)
+arrange(flights, year, desc(month), day)
+arrange(flights, year, month, desc(day))
+arrange(flights, year, desc(month), desc(day))
+```
+
+## Aggregate Data: `summarize()`
+- Aggregate/collapse the data into a single row
+- Think of as applying a function to columns
+```{r, eval=FALSE}
+summarize(flights, delay = mean(dep_delay))
+# Note that the mean function need help
+# handling NA values
+summarize(flights, 
+          delay = mean(dep_delay, na.rm = TRUE))
+```
+
+- More useful as a grouped operation (see next)
+
+## Grouped Operations
+- If a data frame is *grouped*, operations are applied to each group separately, 
+and the results are combined back to a single data frame
+- Use the `group_by()` verb to specify variables to use for generating groups
+```{r, results='hide'}
+flights_by_day <- group_by(flights, day)
+```
+- Some verbs have specific behavior when applied to grouped data
+
+verb | group specific action
+--- | ---
+`arrange()` | sort rows within each group
+`slice()` | extract rows within each group
+`summarize()` | aggregate values group-wise
+
+## Grouped `slice()`
+- Retrieve the first 2 departures (rows) of each day
+```{r}
+slice(flights_by_day, 1:2)
+```
+
+## Grouped `summarize()`
+- Retrieve (1) number of departures (observations), (2) average distance, and  (3) 
+average arrival delay for each day (i.e., for flights grouped by day)
+```{r, eval=FALSE}
+summarize(flights_by_day,  count = n(),
+          dist = mean(distance, na.rm=TRUE),
+          delay = mean(arr_delay, na.rm=TRUE))
+```
+```{r, echo=FALSE}
+data.frame(head(summarize(flights_by_day,  count = n(),
+          dist = mean(distance, na.rm=TRUE),
+          delay = mean(arr_delay, na.rm=TRUE)), 6))
+```
+
+## Multiple (Chained) Operations
+- Consider the following task
+
+> find days when the mean arrival delay OR departure delay was greater than 30
+
+- We can achieve the desired result with three operations
+    1. **`group_by`** date (`year`, `month`, `day`)
+    2. **`summarize`** mean arrival/departure delay
+    3. **`filter`** summarized results (i.e., mean `arr_delay` > 30 
+    | mean `dep_delay` > 30)
+    
+- Note that `dplyr` verbs do **not** modify the original data frame
+    - This is generally a good thing, since it guarantees the integrity of your data 
+    - But it makes multiple operations on a data frame difficult
+- There are two (acceptable) ways to apply multiple operations on a data frame, 
+and one is definitely prefered to the other
+
+## Multiple Operations: The OK Way
+- One way to perform multiple operations is to save intermediate data frames as 
+new data frames
+- This method delivers desired results, but makes your workspace quite messy 
+(i.e., you'll end up with a workspace full of intermediate results)
+```{r, eval=FALSE}
+flights_by_date <- group_by(flights, year, month, day)
+summary_by_date <- summarize(flights_by_date,
+    arr = mean(arr_delay, na.rm=TRUE),
+    dep = mean(dep_delay, na.rm=TRUE))
+big_delay_dates <- filter(summary_by_date, 
+                          arr > 30 | dep > 30)
+```
+- This method might be prefered if you need the intermediate results in 
+the future
+- If not, there is a better way to chain multiple operations with `dplyr`
+
+## The Pipe Operator `%>%`
+- The pipe operator, aka the 'magic' operator, takes the output from the verb on 
+its left-hand side, and uses it as the first argument (data frame) for the verb
+on the right-hand side
+```{r, eval=FALSE}
+big_delay_dates <- 
+    group_by(flights, year, month, day) %>% 
+    summarize(arr = mean(arr_delay, na.rm=TRUE),
+              dep = mean(dep_delay, na.rm=TRUE)) %>% 
+    filter(arr > 30 | dep > 30)
+```
+- No need to save intermediate results
+- Easier to read (i.e., you can follow the operations step-by-step without too 
+much mental accounting)
+
+## `dplyr`: Exercise
+- With the `flights` data
+    1. find the average speed (`distance / air_time * 60`) by each carrier 
+    (ignore `NA`), and sort the data in descending order of average speed
+    2. find the number of flights and average flight time of all flights greater 
+    than 10 hours by each carrier in April
+
+# Exercise Solution
+
+## WARNING
+- Solutions to the exercise are presented in the next slide
+- Try the exercise before proceeding!
+
+## Solution 1
+```{r, results='hide'}
+speed_by_carrier <-
+    group_by(flights, carrier) %>%
+    mutate(speed = distance / air_time * 60) %>%
+    summarize(avg_speed = mean(speed, na.rm=TRUE)) %>%
+    arrange(desc(avg_speed))
+speed_by_carrier
+```
+```{r, echo=FALSE}
+data.frame(head(speed_by_carrier, 8))
+```
+
+## Solution 2
+```{r, results='hide'}
+april_long_flights <-
+    group_by(flights, month, carrier) %>%
+    filter(month == 4 & hour > 10) %>%
+    summarize(avg = mean(hour, na.rm=TRUE), 
+              count = n())
+april_long_flights
+```
+```{r, echo=FALSE}
+data.frame(head(april_long_flights, 8))
+```
+
+# Reshape Data with `tidyr`
+
+## Introduction to `tidyr`
+- Recall, the prefered way to think about a data frame:
+```
+Each column represents a variable/feature
+Each row represents an observation/instance
+```
+- Consider the following (fictional) data frame of students' homework grades
+
+ID | HW1 | HW2 | HW3 | HW4 | HW5
+--- | --- | --- | --- | --- | ---
+jamie | 6 | 7 | 3 | 5 | 8
+cersei | 8 | 5 | 2 | 1 | 9
+hodor | 9 | 10 | 9 | 3 | 10
+
+- What are the variables of this data?
+- What are the potential issues with this representation?
+- What are the benefits of this representation?
+
+## Introduction to `tidyr`: An Example
+- For data manipulation/visualization we often prefer to have data in the 
+*long* form
+- The *long* form of the previous data would be
+
+ID | HW | Score
+--- | --- | ---
+jamie | 1 | 6
+jamie | 2 | 7
+$\vdots$ | $\vdots$ | $\vdots$
+hodor | 4 | 3
+hodor | 5 | 10
+
+- `tidyr` is a package that provides a tools for converting data between *long* 
+and *wide* forms
+
+## Introduction to `tidyr`: Getting Started
+- Install and load the `tidyr` package like you would any other `R` package
+```{r, eval=FALSE}
+# Install, if you haven't already.
+# Only need to do this once on a single machine.
+install.packages('tidyr')
+```
+```{r, results='hide', message=FALSE}
+# load package into workspace
+library('tidyr')
+```
+
+## Introduction to `tidyr`: Getting Started (cont'd)
+- Create some random data
+```{r}
+grades <- 
+    data.frame(ID = c('jamie', 'cersei', 'hodor'),
+               matrix(runif(15, 1, 10), nrow=3))
+colnames(grades) <-  c('ID',  paste0('HW', 1:5))
+grades$info <- c('male/lannister', 
+                 'female/lannister',
+                 'male/stark')
+```
+- Take some time to understand what just happened
+
+## Create *long* data with `gather()`
+- With the `grades` data, we would like to create a data frame in the form of
+
+ID | info | HW | score
+--- | --- | --- | ---
+- | - | - | -
+
+- The verb for gathering multiple columns into key-value pairs in `tidyr` 
+is `gather()`
+- The syntax is
+```{r, eval=FALSE}
+gather(data, key, value, ...)
+```
+- where the `...` should be replaced by column specifications
+
+## Create *long* data with `gather()` (cont'd)
+```{r, results='hide'}
+grades.tidy <- gather(grades, HW, score, HW1:HW5)
+grades.tidy
+```
+```{r, echo=FALSE}
+head(grades.tidy)
+```
+
+## Split a Column to Multiple Variables with `separate()`
+- Often, there will be column that you'd prefer to split into multiple 
+variables, e.g., splitting a `date` column to `year`, `month`, and `day`
+- From the `grades` data, notice that the `info` column combines two variables: 
+`sex` and `house`
+- We can split such columns to multiple variables with the `separate()` verb in `tidyr`
+```{r, results='hide'}
+grades.split <- 
+    separate(grades.tidy, info, 
+             into = c('sex', 'house'), sep = '/')
+grades.split
+```
+```{r, echo=FALSE}
+head(grades.split, 3)
+```
+
+## Chaining `tidyr` verbs
+- Note that `tidyr` operations are also verbs that can be chained with the pipe 
+operator `%>%`
+- For example, we can do the previous operations on the `grades` data with the 
+chained operation
+```{r}
+grades.final <- grades %>%
+    gather(HW, score, HW1:HW5) %>%
+    separate(info, into=c('sex', 'house'), sep='/')
+```
+- `tidyr` verbs can also be chained with `dplyr` verbs (and any other function
+that qualifies as a verb, i.e., takes a data frame as the first argument and
+results in a new data frame)
+
+## Exercise
+- Create some random data
+```{r}
+finance <- 
+    data.frame(ID = c('leia', 'han', 'luke'),
+               matrix(rnorm(18, 1e4, 5e3), nrow=3))
+colnames(finance) <- 
+    c('ID', 
+      paste('Income', 2013:2015, sep='_'),
+      paste('Expense', 2013:2015, sep='_'))
+```
+1. Tidy the data to fit the form
+
+ID | type | year | amount
+--- | --- | --- | --- |
+- | - | - | -
+
+2. Find the mean and total Income/Expense for each ID across all years
+    
+# Exercise Solution
+
+## WARNING
+- Solutions to the exercise are presented in the next slide
+- Try the exercise before proceeding!
+
+## Solution 1
+```{r, results='hide'}
+finance <- finance %>%
+    gather(year, amount, 2:7) %>%
+    separate(year, c('type', 'year'), sep='_')
+finance
+```
+```{r, echo=FALSE}
+head(finance, 8)
+```
+
+## Solution 2
+```{r}
+finance.summary <- finance %>%
+    group_by(ID, type) %>% 
+    summarize(mean=mean(amount), total=sum(amount)) 
+finance.summary
+```
+
+# Combining Data with `join`s
+
+## Basic concatenations
+- `rbind`: concatenate rows
+- `cbind`: concatenate columns
+
+## Example (with matrix, but works with data frames too)
+```{r}
+A <- matrix(1:4, 2, 2)
+B <- matrix(5:8, 2, 2)
+rbind(A, B)
+cbind(A, B)
+```
+
+
+## Introduction to `join`s
+- Sometimes, you will find relevant data across multiple datasets, e.g., a list 
+of grades in one dataset and a list of contact information in another
+- In such cases, you may want to `join` the two datasets into a single data frame
+prior to further analysis
+- For a successful `join` you must determine
+    1. One or more variables that uniquely identify matching observations (rows) 
+    in both datasets
+    2. How you wish to join the data, i.e.,
+        - **Left/right join** Retain one of the datasets entirely, while only 
+        keeping matching entries of the other, possibly resulting in a few 
+        missing values (`NA`)
+        - **Inner join** Retain only complete matches, possibly dropping some rows 
+        of both datasets
+        - **Outer (full) join** Retain all rows of both datasets, but potentially 
+        resulting in many missing values (`NA`)
+        
+## Example Datasets
+- For illustration, let's create two data frames
+```{r}
+info <- data.frame(
+    name=c('tony', 'tony', 'rey'),
+    job=c('scientist', 'tiger', 'scavenger'),
+    score=rnorm(3))
+
+power <- data.frame(
+    name=c('tony', 'hank', 'rey'),
+    job=c('scientist', 'scientist', 'scavenger'),
+    strength=rexp(3))
+```
+- How is an observation (row) uniquely identified?
+
+## Left/Right `join`
+- Retain rows of one dataset, and match the rows of the other
+```{r, warning=FALSE}
+left_join(info, power, by=c('name', 'job'))
+right_join(info, power, by=c('name', 'job'))
+```
+
+## Inner `join`
+- Retain only the rows that have matches on both datasets
+```{r, warning=FALSE}
+inner_join(info, power, by=c('name', 'job'))
+```
+
+## Outer (Full) `join`
+- Retain all rows
+```{r, warning=FALSE}
+full_join(info, power, by=c('name', 'job'))
+```
+
+## Reference
+- A great "cheat sheet" for wrangling data with `dplyr` and `tidyr` is available
+for free at 
+https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf
