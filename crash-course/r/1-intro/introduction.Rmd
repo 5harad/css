@@ -493,13 +493,13 @@ m / N
 proc.time() - ptm
 ```
 
-## Answer 3: A Better Way
+## Answer 3: `R` Way
 ```{r}
 N <- 1e5; 
 ptm <- proc.time()  # measure execution time
 X <- matrix(runif(N*3), nrow=3, ncol=N)
 m <- apply(X, 2, is_good)
-sum(m) / N
+mean(m)
 proc.time() - ptm
 ```
 

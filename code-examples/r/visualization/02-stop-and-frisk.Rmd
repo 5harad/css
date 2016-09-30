@@ -1,0 +1,180 @@
+---
+title: "Visualization - Stop-and-frisk"
+output:  html_document
+---
+
+```{r preamble, results='hide', message=FALSE, warning=FALSE}
+library(ggplot2)
+library(scales)
+library(plyr)
+library(dplyr)
+
+theme_set(theme_bw())
+
+load('../data/sqf.Rdata')
+```
+
+## Hitrate by precinct
+
+```{r by precinct: init}
+p <- ggplot(data=hitrate_by_precinct, aes(x=black, y=white)) +
+  geom_point() +
+  scale_x_continuous('\nHit rate for black suspects',
+                     labels=percent, limits=c(0, .3)) +
+  scale_y_continuous('Hit rate for white suspects\n',
+                     labels=percent, limits=c(0, .5))
+
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'by_precinct_01_init'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r by precinct: rescale}
+p <- ggplot(data=hitrate_by_precinct, aes(x=black, y=white)) +
+  geom_point() +
+  scale_x_continuous('\nHit rate for black suspects',
+                     labels=percent, limits=c(0, .5)) +
+  scale_y_continuous('Hit rate for white suspects\n',
+                     labels=percent, limits=c(0, .5))
+
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'by_precinct_02_rescale'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r by precinct: add diagonal}
+p <- ggplot(data=hitrate_by_precinct, aes(x=black, y=white)) +
+  geom_point() +
+  geom_abline(slope=1, intercept=0, linetype='dashed') +
+  scale_x_continuous('\nHit rate for black suspects',
+                     labels=percent, limits=c(0, .5)) +
+  scale_y_continuous('Hit rate for white suspects\n',
+                     labels=percent, limits=c(0, .5))
+
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'by_precinct_03_add_diagonal'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r by precinct: resize points}
+p <- ggplot(data=hitrate_by_precinct, aes(x=black, y=white)) +
+  geom_point(size=1) +
+  geom_abline(slope=1, intercept=0, linetype='dashed') +
+  scale_x_continuous('\nHit rate for black suspects',
+                     labels=percent, limits=c(0, .5)) +
+  scale_y_continuous('Hit rate for white suspects\n',
+                     labels=percent, limits=c(0, .5))
+
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'by_precinct_04_resize'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+## Hitrate by precinct and location
+
+```{r by location: init}
+p <- ggplot(data=hitrate_by_location, aes(x=black, y=white,
+                                          group=location.housing)) +
+  geom_point(aes(color=location.housing), alpha=.6) +
+  geom_abline(slope=1, intercept=0, linetype='dashed') +
+  scale_color_discrete(element_blank(),
+                       breaks=c('housing', 'neither', 'transit'),
+                       labels=c('Public housing', 'Pedestrian', 'Transit')) +
+  scale_x_continuous('\nHit rate for black suspects',
+                     labels=percent, limits=c(0, .8)) +
+  scale_y_continuous('Hit rate for white suspects\n',
+                     labels=percent, limits=c(0, .8)) +
+  theme(legend.position=c(1, 0), legend.justification=c(1, 0),
+        legend.background=element_blank())
+
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'by_location_01_init'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r by location: log scale}
+p <- ggplot(data=hitrate_by_location, aes(x=black, y=white,
+                                          group=location.housing)) +
+  geom_point(aes(color=location.housing), alpha=.6) +
+  geom_abline(slope=1, intercept=0, linetype='dashed') +
+  scale_color_discrete(element_blank(),
+                       breaks=c('housing', 'neither', 'transit'),
+                       labels=c('Public housing', 'Pedestrian', 'Transit')) +
+  scale_x_continuous('\nHit rate for black suspects',  labels=percent,
+                     trans='log10', limits=c(0.003, 1),
+                     breaks=c(.003, .01, .03, .1, .3, 1)) +
+  scale_y_continuous('Hit rate for white suspects\n',  labels=percent,
+                     trans='log10', limits=c(0.003, 1),
+                     breaks=c(.003, .01, .03, .1, .3, 1)) +
+  theme(legend.position=c(1, 0), legend.justification=c(1, 0),
+        legend.background=element_blank())
+
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'by_location_02_log'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r by location: add size}
+p <- ggplot(data=hitrate_by_location, aes(x=black, y=white,
+                                          group=location.housing)) +
+  geom_point(aes(color=location.housing, size=count), alpha=.6) +
+  geom_abline(slope=1, intercept=0, linetype='dashed') +
+  scale_size_area(guide=FALSE) +
+  scale_color_discrete(element_blank(),
+                       breaks=c('housing', 'neither', 'transit'),
+                       labels=c('Public housing', 'Pedestrian', 'Transit')) +
+  scale_x_continuous('\nHit rate for black suspects',  labels=percent,
+                     trans='log10', limits=c(0.003, 1),
+                     breaks=c(.003, .01, .03, .1, .3, 1)) +
+  scale_y_continuous('Hit rate for white suspects\n',  labels=percent,
+                     trans='log10', limits=c(0.003, 1),
+                     breaks=c(.003, .01, .03, .1, .3, 1)) +
+  theme(legend.position=c(1, 0), legend.justification=c(1, 0),
+        legend.background=element_blank())
+
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'by_location_03_aes_size'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```

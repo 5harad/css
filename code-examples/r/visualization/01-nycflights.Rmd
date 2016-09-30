@@ -1,0 +1,171 @@
+---
+title: "Visualization - `nycflights13`"
+output:  html_document
+---
+
+```{r preamble, results='hide', message=FALSE, warning=FALSE}
+library(ggplot2)
+library(scales)
+library(plyr)
+library(dplyr)
+library(nycflights13)
+
+theme_set(theme_bw())
+```
+
+## Daily volume of flights 
+
+```{r flight volume: process data}
+plot_data <- flights %>%
+  filter(month == 2) %>%
+  mutate(date=as.Date(paste(year, month, day, sep='-'))) %>%
+  group_by(date) %>%
+  summarize(n=n())
+
+head(plot_data)
+```
+
+```{r flight volume: first draft}
+p <- ggplot(data=plot_data, aes(x=date, y=n)) +
+  geom_point()
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'fligh_volume_01_init'
+w = 7
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r flight volume: add lines}
+p <- p + 
+  geom_line()
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'fligh_volume_02_lines'
+w = 7
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r flight volume: break saturdays}
+saturdays <- plot_data %>%
+  filter(strftime(date, format='%u') == 6) %>%
+  select(date)
+p <- p + 
+  scale_x_date(breaks=saturdays$date, date_label='%a %b %d')
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'fligh_volume_03_breaks'
+w = 7
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r flight volume: change axis labels, message=FALSE}
+p <- p + 
+  scale_x_date(element_blank(), breaks=saturdays$date, date_label='%a %b %d') +
+  scale_y_continuous("Flights per day\n", limits=c(600, 1000), labels=comma)
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'fligh_volume_04_axis_labels'
+w = 7
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+
+## Flight delays 
+
+```{r flight delays: process data}
+plot_data <- flights %>%
+  mutate(delay=arr_delay, big_delay=ifelse(delay > 15, 1, 0)) %>%
+  group_by(carrier) %>%
+  summarize(p_big_delay=mean(big_delay, na.rm=TRUE)) %>%
+  join(airlines, by='carrier') %>%
+  mutate(short_name=gsub('(\\w+).*', '\\1', name))
+
+head(plot_data)
+```
+
+```{r flight delay: first draft}
+p <- ggplot(data=plot_data, aes(x=p_big_delay, y=short_name)) +
+  geom_point() +
+  scale_x_continuous(element_blank(), label=percent, limits=c(0, 1)) +
+  scale_y_discrete(element_blank()) +
+  ggtitle('Percentage of flights more than 15 minutes late\n')
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'fligh_delay_01_init'
+w = 7
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r flight delay: adjust limits, message=FALSE} 
+p <- p + 
+  scale_x_continuous(element_blank(), label=percent, limits=c(.1, .4))
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'fligh_delay_02_limits'
+w = 7
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r flight delay: rerank carriers, message=FALSE}
+carriers_ranked <- plot_data %>%
+  arrange(p_big_delay)
+p <- p +  
+  scale_x_continuous(element_blank(), label=percent, limits=c(.1, .4)) +
+  scale_y_discrete(element_blank(), limits=carriers_ranked$short_name)
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'fligh_delay_03_rerank'
+w = 7
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r flight delay: regional/national, message=FALSE}
+national <- c('JetBlue', 'Southwest', 'United', 'American', 'Delta', 'US')
+plot_data <- plot_data %>%
+  mutate(carrier_type=ifelse(short_name %in% national, 'National', 'Regional'))
+
+p <- ggplot(data=plot_data, aes(x=p_big_delay, y=short_name)) +
+  geom_point(aes(shape=carrier_type)) +
+  scale_x_continuous(element_blank(), label=percent, limits=c(.1, .4)) +
+  scale_y_discrete(element_blank(), limits=carriers_ranked$short_name) +
+  scale_shape('Carrier type') +
+  theme(legend.position=c(1,0), legend.justification=c(1,0)) +
+  ggtitle('Percentage of flights more than 15 minutes late\n')
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'fligh_delay_04_aes_group'
+w = 7
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```

@@ -1,0 +1,155 @@
+---
+title: "Visualization - voter intent over time"
+output:  html_document
+---
+
+```{r preamble, results='hide', message=FALSE, warning=FALSE}
+library(ggplot2)
+library(scales)
+library(dplyr)
+
+theme_set(theme_bw())
+
+load('../data/voter_intent.Rdata')
+```
+
+## Voter intent over time (2012 presidential election)
+
+```{r intent over time: process data}
+head(voter_intent)
+```
+
+```{r intent over time: init}
+p <- ggplot(data=voter_intent, aes(x=date, y=p_obama)) +
+  geom_point() +
+  geom_line() +
+  scale_x_date(element_blank(), date_breaks='1 week', date_labels='%b. %d') +
+  scale_y_continuous('Percent support for Obama\n', labels=percent,
+                     limits=c(0, 1))
+p
+```
+
+
+```{r, echo=FALSE}
+file_name = 'voter_intent_01_init'
+w = 7
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r intent over time: adjust y-axis limits, message=FALSE}
+p <-  p +
+  scale_y_continuous('Percent support for Obama\n', labels=percent,
+                     limits=c(.3, .55))
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'voter_intent_02_axis_limits'
+w = 7
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r intent over time: add vertical lines for debates}
+p <-  p +
+  geom_vline(data=debates, aes(xintercept=as.numeric(dates)), linetype='dashed')
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'voter_intent_03_vertical_lines'
+w = 7
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r intent over time: add text to debates}
+debates$event <- paste(c('First', 'Second', 'Third'), 'debate', sep='\n')
+p <-  p +
+  geom_text(data=debates, aes(x=dates, y=.55, label=event),
+            vjust=1, nudge_x=c(-3, -3, 3), size=3)
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'voter_intent_04_text'
+w = 7
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+
+## Demographic distribution
+```{r distribution: initial}
+capitalize_all <- Vectorize(function(x) {
+  s <- strsplit(x, " ")[[1]]
+  paste(toupper(substring(s, 1,1)), substring(s, 2), sep="", collapse=" ")
+})
+
+p <- ggplot(demographic_dist, aes(x=attribute, y=p, group=source)) +
+  geom_bar(aes(color=source, fill=source), stat='identity', position='dodge') +
+  facet_grid(.~cat, scales="free_x", space="free") +
+  scale_y_continuous(element_blank(), limits=c(0,1), labels=percent_format()) +
+  scale_x_discrete(element_blank(), labels=capitalize_all) +
+  theme(axis.text.x=element_text(angle=45, hjust=1, vjust=1)) +
+  theme(legend.position='bottom', legend.title=element_blank())
+
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'demographic_01_init'
+w = 7
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r distribution: change to line}
+p <- ggplot(demographic_dist, aes(attribute, p, group=source)) +
+  geom_point(aes(color=source)) +
+  geom_line(aes(color=source)) +
+  facet_grid(.~cat, scales="free_x", space="free") +
+  scale_y_continuous(element_blank(), limits=c(0,1), labels=percent_format()) +
+  scale_x_discrete(element_blank(), labels=capitalize_all) +
+  theme(axis.text.x=element_text(angle=45, hjust=1, vjust=1)) +
+  theme(legend.position='bottom', legend.title=element_blank())
+
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'demographic_02_lines'
+w = 7
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r distribution: final}
+p <- ggplot(demographic_dist, aes(attribute, p, group=source)) +
+  geom_point() +
+  geom_line(aes(linetype=source)) +
+  facet_grid(.~cat, scales="free_x", space="free") +
+  scale_y_continuous(element_blank(), limits=c(0,1), labels=percent_format()) +
+  scale_x_discrete(element_blank(), labels=capitalize_all) +
+  theme(axis.text.x=element_text(angle=45, hjust=1, vjust=1)) +
+  theme(legend.position='bottom', legend.title=element_blank())
+
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'demographic_03_final'
+w = 7
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+
