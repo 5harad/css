@@ -1,5 +1,2 @@
-**deprecated** -- up-to-date material is now available at the collective
-repository https://github.com/5harad/css
-
-# MS&E 231 tutorial
+# MS&E 231 crash course
 Material for introduction to `R` and `python` tutorial offered as part of MS&E 231.
