@@ -17,7 +17,6 @@ output:
   (*free* from <https://www.r-project.org/>)
 - Latest version of `Rstudio` 
   (also *free* from <https://www.rstudio.com/>)
-- Basic knowledge of data manipulation (as covered in Session 2)
 - A bunch of *free* packages
 ```{r, eval=FALSE}
 # for general plotting
