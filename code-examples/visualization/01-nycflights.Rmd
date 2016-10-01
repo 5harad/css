@@ -156,8 +156,9 @@ p <- ggplot(data=plot_data, aes(x=p_big_delay, y=short_name)) +
   geom_point(aes(shape=carrier_type)) +
   scale_x_continuous(element_blank(), label=percent, limits=c(.1, .4)) +
   scale_y_discrete(element_blank(), limits=carriers_ranked$short_name) +
-  scale_shape('Carrier type') +
-  theme(legend.position=c(1,0), legend.justification=c(1,0)) +
+  scale_shape_manual('Carrier type', values=c(1, 16)) +
+  theme(legend.position=c(1,0), legend.justification=c(1,0),
+        legend.background=element_blank()) +
   ggtitle('Percentage of flights more than 15 minutes late\n')
 p
 ```
