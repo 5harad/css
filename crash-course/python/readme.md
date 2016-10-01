@@ -8,5 +8,5 @@ A brief introduction to `python` in four sections:
   1. classes
 
 ## Directories
-- `handouts/`: printable `pdf` of all notes, originally written in Jupyter
+- `handouts/`: Jupyter notebook files
 - `solutions/`: solutions to each exercise as commented, independent `python` scripts
