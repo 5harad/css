@@ -1,0 +1,255 @@
+---
+title: "Visualization - Twitter visualization"
+output:  html_document
+---
+
+```{r preamble, results='hide', message=FALSE, warning=FALSE}
+library(ggplot2)
+library(scales)
+library(dplyr)
+
+theme_set(theme_bw())
+
+load('../data/twitter_vis.Rdata')
+
+# function to append units (k, M, B) to labels
+addUnits <- function(n) {
+  labels <- ifelse(n < 1000, n,  # less than thousands
+    ifelse(n < 1e6, paste0(round(n/1e3), 'k'),  # in thousands
+    ifelse(n < 1e9, paste0(round(n/1e6), 'M'),  # in millions
+    ifelse(n < 1e12, paste0(round(n/1e9), 'B'), # in billions
+                            'too big!'
+                            ))))
+  return(labels)
+}
+
+# function to capitalize first letter of a string
+capitalize <- function(s) {
+  paste(toupper(substring(s, 1, 1)), substring(s, 2), sep="")
+}
+```
+
+# Cascade size histogram
+
+```{r cascade histogram: init}
+size.dist.trunc <- size.dist %>%
+  filter(size <= 1000)
+
+p <- ggplot(data=size.dist.trunc, aes(x=size)) +
+  geom_histogram(aes(weight=count), binwidth = 30) +
+  scale_x_continuous('\nCascade Size') +
+  scale_y_continuous('Number of cascades\n', label=addUnits) +
+  coord_cartesian(xlim=c(0, 1000))
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'cascade_histogram_01_init'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r cascade histogram: log-scale, warning=FALSE}
+p <- ggplot(data=size.dist.trunc, aes(x=size)) +
+  geom_histogram(aes(weight=count), binwidth = 30, position='dodge') +
+  scale_x_continuous('\nCascade Size') +
+  scale_y_log10('Number of cascades\n', label=addUnits) +
+  coord_cartesian(xlim=c(0, 1000))
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'cascade_histogram_02_log_scale'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+## Warning!
+
+Using specifying axis `limits` when using a `stat_` geom (e.g., 
+`geom_histogram`, `geom_bar`) could result in unexpected data loss.
+Always use `coord_cartesian` to adjust axis limits in such cases.
+
+```{r cascade histogram: warning example, warning=FALSE}
+p <- ggplot(data=size.dist.trunc, aes(x=size)) +
+  geom_histogram(aes(weight=count), binwidth = 30, position='dodge') +
+  scale_x_continuous('\nCascade Size', limits=c(0, 1000)) +
+  scale_y_log10('Number of cascades\n', label=addUnits)
+p
+```
+
+
+## Cascade size distribution
+
+```{r cascade distribution: init, warning=FALSE, message=FALSE}
+p <- ggplot(data=size.dist, aes(x=size, y=1-cdf)) +
+  geom_line() + 
+  scale_x_continuous(labels=comma, limits=c(1,1e4)) + 
+  scale_y_log10(breaks=10^seq(-7,0), labels=sapply(10^seq(-7,0), percent),
+                limits=c(1e-7, .1)) + 
+  labs(x='\nCascade Size', y='CCDF')
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'cascade_size_dist_01_init'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r cascade distribution: log_x, warning=FALSE, message=FALSE}
+p <- ggplot(data=size.dist, aes(x=size, y=1-cdf)) +
+  geom_line() +
+  scale_x_log10(labels=comma, breaks=10^(0:log10(max(size.dist$size))),
+                limits=c(1,1e4)) +
+  scale_y_log10(breaks=10^seq(-7,0), labels=sapply(10^seq(-7,0), percent),
+                limits=c(1e-7, .1)) +
+  labs(x='\nCascade Size', y='CCDF') 
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'cascade_size_dist_02_log_x'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r cascade distribution: by_category, warning=FALSE, message=FALSE}
+p <- ggplot(data=dist.by.category, aes(x=size, y=ccdf, group=category)) +
+  geom_line(aes(color=category)) +
+  scale_x_log10(labels=comma, breaks=10^(0:log10(max(stats$size)))) +
+  scale_y_log10(breaks=10^seq(-5,0), labels=sapply(10^seq(-5,0), percent)) +
+  labs(x='\nCascade Size', y='CCDF') +
+  theme(legend.position=c(0, 0), legend.justification=c(0, 0), 
+        legend.title=element_blank(), legend.background=element_blank()) +
+  scale_color_discrete(labels=capitalize, breaks=category.breaks)
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'cascade_size_dist_03_by_category'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+
+## Popularity vs. Virality
+
+### Scatter plots
+
+```{r structural virality: init}
+p <- ggplot(data=stats, aes(x=size, y=avg.dist)) +
+  geom_point() +
+  scale_x_log10(labels=comma) +
+  scale_y_continuous() +
+  labs(x='Cascade size', y='Structural virality')
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'structural_virality_01_init'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r structural virality: log_y}
+p <- ggplot(data=stats, aes(x=size, y=avg.dist)) +
+  geom_point() +
+  scale_x_log10(labels=comma) +
+  scale_y_log10(labels=comma) +
+  labs(x='Cascade size', y='Structural virality')
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'structural_virality_02_log_y'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r structural virality: resize}
+p <- ggplot(data=stats, aes(x=size, y=avg.dist)) +
+  geom_point(size=1) +
+  scale_x_log10(labels=comma) +
+  scale_y_log10() +
+  labs(x='Cascade size', y='Structural virality')
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'structural_virality_03_resize'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r structural virality: add alpha}
+p <- ggplot(data=stats, aes(x=size, y=avg.dist)) +
+  geom_point(size=1, alpha=0.5) +
+  scale_x_log10(labels=comma) +
+  scale_y_log10() +
+  labs(x='Cascade size', y='Structural virality')
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'structural_virality_04_add_alpha'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+### Box plots
+
+```{r structural virality box: init}
+p <- ggplot(data=stats.box, aes(x=factor(size.bin), y=avg.dist)) +
+  geom_boxplot() +
+  scale_x_discrete(labels=comma(c(100, 300, 1e3, 3e3, 1e4))) +
+  scale_y_log10(breaks=c(3, 10, 30)) +
+  labs(x='Cascade Size', y='Structural virality')
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'structural_virality_box_01_init'
+w = 5
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+```{r structural virality box: category facet}
+p <- ggplot(data=stats.box, aes(x=factor(size.bin), y=avg.dist)) +
+  facet_grid(~ category, scales='free_x', space='free_x') +
+  geom_boxplot() +
+  scale_x_discrete(labels=comma(c(100, 300, 1e3, 3e3, 1e4))) +
+  scale_y_log10(breaks=c(3, 10, 30, 100)) +
+  labs(x='Cascade Size', y='Structural virality')
+p
+```
+
+```{r, echo=FALSE}
+file_name = 'structural_virality_box_02_cat_facet'
+w = 10
+h = 5
+ggsave(paste0('plots/', file_name, '.pdf'), width=w, height=h)
+ggsave(paste0('plots/', file_name, '.png'), width=w, height=h)
+```
+
+
