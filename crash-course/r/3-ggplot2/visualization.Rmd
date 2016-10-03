@@ -25,7 +25,8 @@ install.packages('scales')
 # spacial visualization on maps
 install.packages('ggmap')   
 # for data pre-processing  and formatting
-install.packages('dplyr')
+ccccfnhluuriihetrfjjcvvjcuudrkjdrigeridurv
+
 install.packages('tidyr')
 ```
 ```{r, echo=FALSE, results='hide', message=FALSE}
