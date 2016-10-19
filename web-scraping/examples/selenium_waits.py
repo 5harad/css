@@ -5,6 +5,9 @@ Example using selenium to wait for load
 Requires:
     selenium
         pip install selenium
+
+Note: For  Firefox 47.0+ you'll need to install the Marionette webdriver, see:
+    https://developer.mozilla.org/en-US/docs/Mozilla/QA/Marionette/WebDriver
 '''
 
 from selenium import webdriver
