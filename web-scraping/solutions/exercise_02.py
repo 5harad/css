@@ -38,13 +38,12 @@ def main():
         # Parse the html content of the web page with BeautifulSoup
         soup = BeautifulSoup(page.content)
 
-        for movie in soup.find('table', class_='results').find_all('tr'):
+        for movie in soup.find_all('div', class_='lister-item-content'):
             try:
-                title = movie.find('td', class_='title').a.text
-                year = (movie.find('td', class_='title')
-                             .find('span', class_='year_type')
-                             .text)
-                gross = movie.find('td', class_='sort_col').text
+                title = movie.find('h3', class_='lister-item-header').a.text
+                year = movie.find('span', class_='lister-item-year').text
+                gross = (movie.find('span', text='Gross:')
+                         .find_next_sibling('span').get('data-value'))
 
                 print title, year, gross
             except AttributeError:
