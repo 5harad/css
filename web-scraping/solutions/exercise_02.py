@@ -45,7 +45,7 @@ def main():
                 gross = (movie.find('span', text='Gross:')
                          .find_next_sibling('span').get('data-value'))
 
-                print title, year, gross
+                print '\t'.join([title, year, gross])
             except AttributeError:
                 pass
 
