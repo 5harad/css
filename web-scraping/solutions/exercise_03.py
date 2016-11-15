@@ -35,7 +35,7 @@ def main():
     keys = ['vin', 'year', 'trim', 'mileage', 'price']
 
     # this is a place holder for the url to the api that you'll
-    #   found during the workshop!
+    # find during the workshop!
     base_url = '/url/to/api'
 
     # request json file with GET
