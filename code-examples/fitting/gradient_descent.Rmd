@@ -1,0 +1,208 @@
+---
+title: "Fitting with Gradient"
+author: "Jongbin Jung"
+date: "November 14, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(plotly)
+knitr::opts_chunk$set(echo = TRUE)
+
+theme_set(theme_bw())
+```
+
+# Example with Linear Regression
+
+## Setup
+
+We want to fit a line ($y = ax + b$) to some data, for example
+
+```{r generate data}
+a <- runif(1) + 0.5
+b <- runif(1) + 2
+example_data <- tibble(x=runif(100, 0, 10), e=rnorm(100)) %>%
+  mutate(y=a*x+b+e)
+ggplot(example_data, aes(x=x, y=y)) +
+  geom_point() +
+  scale_y_continuous(limits = c(0, 15)) +
+  scale_x_continuous(limits = c(0, 10))
+```
+
+Given data $x$ and $y$, for estimated values $\hat{a}, \hat{b}$, define the 
+loss function
+
+$$l(a,b) = \frac{1}{N}\sum_i^N(y_i-(\hat{a}x_i+\hat{b}))^2$$
+
+```{r loss function}
+mse <- function(y, x, a, b) {
+  mean((y - (a*x + b))^2)
+}
+```
+
+## Gradient Descent
+
+Partial derivatives for each parameter $a, b$ are calculated: 
+
+$$ \frac{\partial}{\partial a} = \frac{2}{N}\sum_i^N-x_i(y_i-(ax_i+b)) $$
+$$ \frac{\partial}{\partial b} = \frac{2}{N}\sum_i^N-(y_i-(ax_i+b)) $$
+
+and a single iteration, given starting points for $a, b$, the data, and learning
+rate can be written:
+
+```{r function: gradient step}
+step_gradient <- function(a_now, b_now, data, rate) {
+  a_grad <- 2 * mean(-data$x * (data$y - (a_now * data$x + b_now)))
+  b_grad <- 2 * mean(-(data$y - (a_now * data$x + b_now)))
+  a_new <- a_now - (rate * a_grad)
+  b_new <- b_now - (rate * b_grad)
+  return(tibble(a=a_new, b=b_new))
+}
+```
+
+Now, we can take multiple iterations.
+
+```{r generate iterations}
+coefs <- tibble(a=0, b=0)
+rate <- 0.01
+MAX_ITER <- 500
+for (i in 1:MAX_ITER) {
+  now <- coefs %>%
+    tail(1)
+  
+  coefs <- bind_rows(coefs, step_gradient(now$a, now$b, example_data, rate))
+}
+sample_coefs <- coefs %>%
+  slice(c(1:4, seq(5, MAX_ITER, MAX_ITER/50))) %>%
+  rowwise() %>%
+  mutate(loss=mse(example_data$y, example_data$x, a, b)) %>%
+  ungroup()
+sample_coefs$iter <- seq(1, 54)
+```
+
+## Animated plots (an attempt)
+
+```{r animated, echo=FALSE, message=FALSE, warning=FALSE}
+p <-  ggplot(example_data, aes(x=x, y=y)) +
+  geom_point() +
+  geom_abline(slope=a, intercept=b, linetype="dashed") +
+  geom_abline(data=sample_coefs, aes(slope=a, intercept=b, frame=iter), color='red') +
+  scale_y_continuous(limits = c(0, 15))
+
+ggplotly(p)
+
+
+# models <- expand.grid(a = seq(range(coefs$a)[1], range(coefs$a)[2], .25), 
+#                       b = seq(range(coefs$b)[1], range(coefs$b)[2], .25)) %>%
+# models <- expand.grid(a = seq(-1, 3, .25), 
+#                       b = seq(-3, 3, .25)) %>%
+#   rowwise() %>%
+#   mutate(mse = mse(example_data$y, example_data$x, a, b)) %>%
+#   ungroup()
+# 
+# models$loss <- models[["mse"]]
+# min_mse <- filter(models, mse == min(mse))
+# min_loss <- filter(models, loss == min(loss))
+# 
+# plot_loss <- plot_ly(data=models, x=~b, y=~a, color=~loss, opacity=0.5, intensity=~loss, 
+#         colors=colorRamp(heat.colors(8)), showscale=F) %>%
+#   add_markers(data=sample_coefs, frame=~iter, x=~b, y=~a, color=I("blue")) 
+#   layout(scene = list(camera = list(eye = list(x = 2, y = 1, z = 0.5)),
+#                       xaxis=list(title="Intercept (b)"),
+#                       yaxis=list(title="Slope (a)"),
+#                       zaxis=list(title="Error")))
+# 
+# subplot(base, plot_loss, nrows=1, widths=c(0.5, 0.5), margin = 0.1)
+```
+
+## Static snapshots
+
+### Initial state
+
+```{r iter 0, echo=FALSE, message=FALSE, warning=FALSE}
+iter_coefs <- sample_coefs %>%
+  slice(1)
+p <-  ggplot(example_data, aes(x=x, y=y)) +
+  geom_point() +
+  geom_abline(slope=a, intercept=b, linetype="dashed") +
+  geom_abline(data=iter_coefs, aes(slope=a, intercept=b), color='red') +
+  scale_y_continuous(limits = c(0, 15))
+
+ggplotly(p)
+
+models <- expand.grid(a = seq(-0.5, 3, .25),
+                      b = seq(-1, 3, .25)) %>%
+  rowwise() %>%
+  mutate(mse = mse(example_data$y, example_data$x, a, b)) %>%
+  ungroup()
+
+models$loss <- models[["mse"]]
+min_mse <- filter(models, mse == min(mse))
+min_loss <- filter(models, loss == min(loss))
+
+plot_ly(data=models, x=~b, y=~a, z=~loss, opacity=0.5, type="mesh3d", 
+                     opacity=0.5, intensity=~loss,  colors=colorRamp(heat.colors(8)),
+                     showscale=F) %>%
+  add_markers(data=iter_coefs, x=~b, y=~a, z=~loss, color=I("blue")) %>%
+  layout(scene = list(camera = list(eye = list(x = 2, y = 1, z = 0.5)),
+                      xaxis=list(title="Intercept (b)"),
+                      yaxis=list(title="Slope (a)"),
+                      zaxis=list(title="Error")))
+```
+
+### 5 iterations
+
+```{r iter 5, echo=FALSE, message=FALSE, warning=FALSE}
+iter_coefs <- sample_coefs %>%
+  slice(6)
+path_coefs <- sample_coefs %>%
+  slice(1:6)
+p <-  ggplot(example_data, aes(x=x, y=y)) +
+  geom_point() +
+  geom_abline(slope=a, intercept=b, linetype="dashed") +
+  geom_abline(data=iter_coefs, aes(slope=a, intercept=b), color='red') +
+  scale_y_continuous(limits = c(0, 15))
+
+ggplotly(p)
+
+plot_ly(data=models, x=~b, y=~a, z=~loss, opacity=0.5, type="mesh3d", 
+                     opacity=0.5, intensity=~loss,  colors=colorRamp(heat.colors(8)),
+                     showscale=F) %>%
+  add_markers(data=path_coefs, x=~b, y=~a, z=~loss, color=I("blue"), inherit=FALSE) %>%
+  add_paths(data=path_coefs, x=~b, y=~a, z=~loss, color=I("blue"), inherit=FALSE) %>%
+  layout(scene = list(camera = list(eye = list(x = 2, y = 1, z = 0.5)),
+                      xaxis=list(title="Intercept (b)"),
+                      yaxis=list(title="Slope (a)"),
+                      zaxis=list(title="Error")),
+         showlegend=FALSE)
+```
+
+### 10 iterations
+
+```{r iter 10, echo=FALSE, message=FALSE, warning=FALSE}
+iter_coefs <- sample_coefs %>%
+  slice(11)
+path_coefs <- sample_coefs %>%
+  slice(1:11)
+p <-  ggplot(example_data, aes(x=x, y=y)) +
+  geom_point() +
+  geom_abline(slope=a, intercept=b, linetype="dashed") +
+  geom_abline(data=iter_coefs, aes(slope=a, intercept=b), color='red') +
+  scale_y_continuous(limits = c(0, 15))
+
+ggplotly(p)
+
+plot_ly(data=models, x=~b, y=~a, z=~loss, opacity=0.5, type="mesh3d", 
+                     opacity=0.5, intensity=~loss,  colors=colorRamp(heat.colors(8)),
+                     showscale=F) %>%
+  add_markers(data=path_coefs, x=~b, y=~a, z=~loss, color=I("blue"), inherit=FALSE) %>%
+  add_paths(data=path_coefs, x=~b, y=~a, z=~loss, color=I("blue"), inherit=FALSE) %>%
+  layout(scene = list(camera = list(eye = list(x = 2, y = 1, z = 0.5)),
+                      xaxis=list(title="Intercept (b)"),
+                      yaxis=list(title="Slope (a)"),
+                      zaxis=list(title="Error")),
+         showlegend=FALSE)
+```
+
+
