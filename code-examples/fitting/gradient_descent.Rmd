@@ -82,17 +82,23 @@ for (i in 1:MAX_ITER) {
   
   coefs <- bind_rows(coefs, step_gradient(now$a, now$b, example_data, rate))
 }
+```
+
+For brevity, let's just take a sample of all iterations
+
+```{r sampling iters}
 sample_coefs <- coefs %>%
-  slice(c(1:4, seq(5, MAX_ITER, MAX_ITER/50))) %>%
+  mutate(iter=1, original_iter=cumsum(iter)) %>%
+  slice(c(1:4, seq(5, MAX_ITER, MAX_ITER/50), MAX_ITER)) %>%
   rowwise() %>%
   mutate(loss=mse(example_data$y, example_data$x, a, b)) %>%
-  ungroup()
-sample_coefs$iter <- seq(1, 54)
+  ungroup() %>%
+  mutate(iter=cumsum(iter))
 ```
 
-## Fitting the line
+## Line fit and changes in loss
 
-```{r animated_gganimate, echo=FALSE, message=FALSE, warning=FALSE, fig.show="animate"}
+```{r animated_alt, echo=FALSE, fig.show="animate", message=FALSE, warning=FALSE}
 xlb <- -1   #min(sample_coefs$b) - 0.2
 xub <- 3    #max(sample_coefs$b) + 0.2
 ylb <- -1   #min(sample_coefs$a) - 0.2
@@ -108,58 +114,32 @@ models$loss <- models[["mse"]]
 min_mse <- filter(models, mse == min(mse))
 min_loss <- filter(models, loss == min(loss))
 
-p <-  ggplot(example_data, aes(x=x, y=y)) +
-  geom_point() +
-  geom_abline(slope=a, intercept=b, linetype="dashed") +
-  geom_abline(data=sample_coefs, aes(slope=a, intercept=b, frame=iter), color='red') +
-  scale_x_continuous(limits = c(0, 10)) +
-  scale_y_continuous(limits = c(0, 15))
+plts <- lapply(sample_coefs$iter, function(i) {
+  frame_coefs <- sample_coefs %>%
+    filter(iter == i)
+  cum_coefs <- sample_coefs %>%
+    filter(iter <= i)
   
-  # loss <- ggplot(data=models, aes(x=b, y=a)) +
-  #   geom_raster(interpolate=TRUE, aes(fill=log(loss))) +
-  #   geom_point(x=b, y=a, color='red', shape=4) +
-  #   geom_point(data=coef_now, aes(x=b, y=a)) +
-  #   geom_line(data=coef_cum, aes(x=b, y=a), linetype='dashed') +
-  #   scale_fill_gradient(low='grey10', high='grey90', guide=FALSE) +
-  #   scale_x_continuous(expand=c(0,0)) +
-  #   scale_y_continuous(expand=c(0,0))
+  points <-  ggplot(example_data, aes(x=x, y=y)) +
+    geom_point() +
+    geom_abline(slope=a, intercept=b, linetype="dashed") +
+    geom_abline(data=frame_coefs, aes(slope=a, intercept=b), color='red') +
+    labs(title='Line fit') +
+    theme(plot.title = element_text(hjust=0.5)) +
+    scale_x_continuous(limits = c(0, 10)) +
+    scale_y_continuous(limits = c(0, 15))
   
-gg_animate(p)
+  loss <- ggplot(data=models, aes(x=b, y=a)) +
+    geom_contour(aes(z=log(loss))) +
+    geom_point(x=b, y=a, color='red', shape=4) +
+    geom_point(data=frame_coefs, aes(x=b, y=a)) +
+    geom_line(data=cum_coefs, aes(x=b, y=a), linetype='dashed') +
+    labs(title='Loss') +
+    theme(plot.title = element_text(hjust=0.5)) +
+    scale_x_continuous(expand=c(0,0)) +
+    scale_y_continuous(expand=c(0,0))
+  
+  print(plot_grid(points, loss))
+})
 ```
 
-## Changes in the error
-
-```{r animated_loss_gganimate, echo=FALSE, message=FALSE, warning=FALSE, fig.show="animate"}
-xlb <- -1   #min(sample_coefs$b) - 0.2
-xub <- 3    #max(sample_coefs$b) + 0.2
-ylb <- -1   #min(sample_coefs$a) - 0.2
-yub <- 3  #max(sample_coefs$a) + 0.2
-
-models <- expand.grid(a = seq(ylb, yub, .1),
-                      b = seq(xlb, xub, .1)) %>%
-  rowwise() %>%
-  mutate(mse = mse(example_data$y, example_data$x, a, b)) %>%
-  ungroup()
-
-models$loss <- models[["mse"]]
-min_mse <- filter(models, mse == min(mse))
-min_loss <- filter(models, loss == min(loss))
-
-# p <-  ggplot(example_data, aes(x=x, y=y)) +
-#   geom_point() +
-#   geom_abline(slope=a, intercept=b, linetype="dashed") +
-#   geom_abline(data=sample_coefs, aes(slope=a, intercept=b, frame=iter), color='red') +
-#   scale_x_continuous(limits = c(0, 10)) +
-#   scale_y_continuous(limits = c(0, 15))
-  
-loss <- ggplot(data=models, aes(x=b, y=a)) +
-  geom_raster(interpolate=TRUE, aes(fill=log(loss))) +
-  geom_point(x=b, y=a, color='red', shape=4) +
-  geom_point(data=sample_coefs, aes(x=b, y=a, frame=iter)) +
-  geom_line(data=sample_coefs, aes(x=b, y=a, cumulative=TRUE, frame=iter), linetype='dashed') +
-  scale_fill_gradient(low='grey10', high='grey90', guide=FALSE) +
-  scale_x_continuous(expand=c(0,0)) +
-  scale_y_continuous(expand=c(0,0))
-  
-gg_animate(loss)
-```

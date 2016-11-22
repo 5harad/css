@@ -26,6 +26,10 @@ ggplot(example_data, aes(x=x, y=y)) +
   scale_x_continuous(limits = c(0, 10))
 ```
 
+```
+## Warning: Removed 13 rows containing missing values (geom_point).
+```
+
 ![](gradient_descent_files/figure-html/generate data-1.png)<!-- -->
 
 Given data $x$ and $y$, for estimated values $\hat{a}, \hat{b}$, define the 
@@ -74,60 +78,43 @@ for (i in 1:MAX_ITER) {
   
   coefs <- bind_rows(coefs, step_gradient(now$a, now$b, example_data, rate))
 }
-sample_coefs <- coefs %>%
-  slice(c(1:4, seq(5, MAX_ITER, MAX_ITER/50))) %>%
-  rowwise() %>%
-  mutate(loss=mse(example_data$y, example_data$x, a, b)) %>%
-  ungroup()
-sample_coefs$iter <- seq(1, 54)
 ```
 
-## Fitting the line
+For brevity, let's just take a sample of all iterations
+
+
+```r
+sample_coefs <- coefs %>%
+  mutate(iter=1, original_iter=cumsum(iter)) %>%
+  slice(c(1:4, seq(5, MAX_ITER, MAX_ITER/50), MAX_ITER)) %>%
+  rowwise() %>%
+  mutate(loss=mse(example_data$y, example_data$x, a, b)) %>%
+  ungroup() %>%
+  mutate(iter=cumsum(iter))
+```
+
+## Line fit and changes in loss
 
 
 <div class="scianimator">
-<div id="animated_gganimate" style="display: inline-block;">
+<div id="animated_alt" style="display: inline-block;">
 </div>
 </div>
 <script type="text/javascript">
   (function($) {
     $(document).ready(function() {
-      var imgs = Array(54);
+      var imgs = Array(55);
       for (i = 0; ; i++) {
         if (i == imgs.length) break;
-        imgs[i] = "gradient_descent_files/figure-html/animated_gganimate-" + (i + 1) + ".png";
+        imgs[i] = "gradient_descent_files/figure-html/animated_alt-" + (i + 1) + ".png";
       }
-      $("#animated_gganimate").scianimator({
+      $("#animated_alt").scianimator({
           "images": imgs,
           "delay": 1000,
           "controls": ["first", "previous", "play", "next", "last", "loop", "speed"],
       });
-      $("#animated_gganimate").scianimator("play");
+      $("#animated_alt").scianimator("play");
     });
   })(jQuery);
 </script>
 
-## Changes in the error
-
-
-<div class="scianimator">
-<div id="animated_loss_gganimate" style="display: inline-block;">
-</div>
-</div>
-<script type="text/javascript">
-  (function($) {
-    $(document).ready(function() {
-      var imgs = Array(54);
-      for (i = 0; ; i++) {
-        if (i == imgs.length) break;
-        imgs[i] = "gradient_descent_files/figure-html/animated_loss_gganimate-" + (i + 1) + ".png";
-      }
-      $("#animated_loss_gganimate").scianimator({
-          "images": imgs,
-          "delay": 1000,
-          "controls": ["first", "previous", "play", "next", "last", "loop", "speed"],
-      });
-      $("#animated_loss_gganimate").scianimator("play");
-    });
-  })(jQuery);
-</script>
