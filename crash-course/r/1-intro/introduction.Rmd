@@ -56,7 +56,7 @@ setwd("path")
  `C:\Users\Username\Documents` in windows
  - Use forward slashes (`/`), even on Windows!
 ```{r, eval=FALSE, tidy=TRUE}
-setwd("~/Documents/R")  
+setwd("~/R")  
 ```
 
 ## `R` Basics: Math Operations
@@ -90,10 +90,10 @@ A = 12  # good
 - A `String` variable can be declared in either double quotes(`""`) or 
 single quotes (`''`)
 ```{r}
-str <- "This is a valid string"
-str
-str <- 'and so is this'
-str
+s <- "This is a valid string"
+s
+s <- 'and so is this'
+s
 ```
 
 ## `R` Basics: Re-Assignments
@@ -109,6 +109,8 @@ x  # Now it is a string
 # Vectors
 
 ## Vectors: `c()`
+ - Vectors are the building blocks of `R` --- even a single variable is actually 
+ an "atomic" vector (vector of size 1)
  - Vectors in `R` are created by *c*oncatenating a series of elements
 ```{r}
 X <- c(1,2,3)
@@ -283,30 +285,30 @@ c(1, 2, 3) >= c(1, 2, 4)
 ## Helpful Vector Functions
 - If possible, avoid `loops` by operating over the Vector/Matrix as a whole
 ```{r, eval=FALSE}
-mean(X)					# mean
-sd(X)					# standard deviation
-var(X)					# variance
-max(X)      			# maximum
-min(X)      			# minimum
-median(X)				# median
-sum(X)      			# sum
-prod(X)					# product
-quantile(X,probs=0.5)	# quantile for specified probs
-length(X)   			# length of the vector
-range(X)				# range
+mean(X)                # mean
+sd(X)                  # standard deviation
+var(X)                 # variance
+max(X)                 # maximum
+min(X)                 # minimum
+median(X)              # median
+sum(X)                 # sum
+prod(X)                # product
+quantile(X,probs=0.5)  # quantile for specified probs
+length(X)              # length of the vector
+range(X)               # range
 ```
 
 ## Helpful Matrix Functions
 - If possible, avoid `loops` by operating over the Vector/Matrix as a whole
 ```{r, eval=FALSE}
-rowSums(A)	# Row sums
-colSums(A)	# Column sums
-rowMeans(A)	# Row means
-colMeans(A)	# Columns means
-diag(A)		# Diagonal of a matrix
-solve(A)	# Inverse of a matrix
-cov(A)		# Variance covariance matrix
-cor(A)		# Correlation matrix
+rowSums(A)   # Row sums
+colSums(A)   # Column sums
+rowMeans(A)  # Row means
+colMeans(A)  # Columns means
+diag(A)      # Diagonal of a matrix
+solve(A)     # Inverse of a matrix
+cov(A)       # Variance covariance matrix
+cor(A)       # Correlation matrix
 ```
 
 # Functions
@@ -314,10 +316,11 @@ cor(A)		# Correlation matrix
 ## Some more built-in functions
 - We've already seen many built-in functions, but here are some more!
 ```{r, eval=FALSE}
-log(X)  # element-wise log 
-exp(X)  # element-wise exponential 
+log(X)   # element-wise log 
+exp(X)   # element-wise exponential 
 sqrt(X)  # element-wise square root
 ```
+
 
 ## Functions for Strings
 ```{r}
@@ -334,9 +337,10 @@ sprintf('one plus one = %d', 1+1)
 (e.g., when constructing filenames/paths in run-time)
 ```{r}
 # short-hand for concatenation w/o spaces
-filename = 'some_file_name'
-paste0('path/to/', filename, '.csv')  
-paste0(getwd(), '/', filename, '.csv')  
+filename = 'some_file_name.csv'
+paste0('path/to/', filename)  
+# function specifically for constructing file paths
+file.path('path', 'to', filename)
 ```
 
 ## Functions for Strings (cont'd)
@@ -369,9 +373,21 @@ if (condition) {
 } else if(other_condition) {  # (OPTIONAL)
     # stuff to do if other_condition is TRUE
 } else {  # (OPTIONAL)
-    # stuff to do if all conditions are TRUE
+    # stuff to do if all other conditions are FALSE
 }
 ```
+
+- Some consider the catch-all `else` clause to be dangerous
+    - Some style guides even recommend avoiding the use of `else` for better 
+    readability
+- Best practice is to make conditions explicit whenever possible
+
+## Loops: Note!
+- Loops in `R` are inefficient
+- For most cases, there will be a much faster, *vectorized* alternative to 
+looping
+- We cover loops because there are some *rare* cases in which a loop might make 
+more sense, but in general, loops should be avoided when writing `R`
 
 ## Loops
 - `for` statements
@@ -415,7 +431,8 @@ name_of_function(arguments)  # gives you the 'result'
 ```
 
 ## User Defined Functions: Example
-- Write a function that will take a vector in $\mathbb{R}^3$ and tell you if you can make a triangle or not
+- Write a function that will take a vector in $\mathbb{R}^3$ and tell you if you 
+can make a triangle or not
 ```{r}
 is_good <- function(vec) {
     if (length(vec) != 3) {
@@ -450,6 +467,7 @@ apply(X, 1, var)  # variance of rows
 apply(X, 2, var)  # variance of columns
 ```
 
+
 # Exercise
 
 ## The Question
@@ -465,8 +483,8 @@ apply(X, 2, var)  # variance of columns
 
 ## Answer 1: A (not too good) Way
 ```{r}
+system.time({  # measure execution time
 N <- 1e5; 
-ptm <- proc.time()  # measure execution time
 m <- 0
 for (i in 1:N) {
     X <- runif(3)
@@ -474,33 +492,18 @@ for (i in 1:N) {
         m <- m + 1
     }
 }
-m / N
-proc.time() - ptm
+cat(sprintf('%.2f%%\n', m / N * 100))
+})
 ```
 
-## Answer 2: An Okay Way
+## Answer 2: Preferred `R` Way
 ```{r}
-N <- 1e5; 
-ptm <- proc.time()  # measure execution time
-X <- matrix(runif(N*3), nrow=3, ncol=N)
-m <- 0
-for (i in 1:N) {
-    if (is_good(X[,i])) {
-        m <- m + 1
-    }
-}
-m / N
-proc.time() - ptm
-```
-
-## Answer 3: `R` Way
-```{r}
-N <- 1e5; 
-ptm <- proc.time()  # measure execution time
-X <- matrix(runif(N*3), nrow=3, ncol=N)
-m <- apply(X, 2, is_good)
-mean(m)
-proc.time() - ptm
+system.time({  # measure execution time
+  N <- 1e5; 
+  X <- matrix(runif(N*3), nrow=3, ncol=N)
+  m <- apply(X, 2, is_good)
+  cat(sprintf('%.2f%%\n',  mean(m) * 100 ))
+})
 ```
 
 # Packages
@@ -515,9 +518,9 @@ install.packages("package name")
 ```
 - You will have to select one of many CRAN mirrors (copies across different 
 servers) from which to download the package from
-- For example, to install the `dplyr` package, run
+- For example, to install the `tidyverse` package, run
 ```{r, eval=FALSE}
-install.packages("dplyr")
+install.packages("tidyverse")
 ```
 - You only need to do this *once* for each machine
 
@@ -525,8 +528,9 @@ install.packages("dplyr")
 ## Loading Packages
 - Once you've installed a package on a machine, you can load the package into 
 your current workspace with the `library()` command
-- For example, to use the `dplyr` package, first load it with
+- For example, to use the `tidyverse` package, first load it with
 ```{r, eval=FALSE}
-library("dplyr")
+library("tidyverse")
 ```
-- Note: If you ever need to use the two packages `plyr` and `dplyr` within the same workspace (which you will), ALWAYS (!!!) load `plyr` first!
+- Note: If you ever need to use the two packages `plyr` and `tidyverse` within 
+the same workspace (which you will), ALWAYS (!!!) load `plyr` first!
