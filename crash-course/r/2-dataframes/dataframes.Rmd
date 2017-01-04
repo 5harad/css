@@ -19,13 +19,16 @@ output:
 - A bunch of *free* packages
 
 ```{r, eval=FALSE}
-install.packages('dplyr')
-install.packages('tidyr')
+# The single tidyverse package now includes 
+# dplyr and tidyr
+install.packages('tidyverse')
+# install.packages('dplyr')
+# install.packages('tidyr')
 install.packages('nycflights13')  # sample data frame
 ```
 ```{r, echo=FALSE, results='hide', message=FALSE}
 options(width=50)
-library('dplyr', 'tidyr')
+library('tidyverse')
 ```
 
 ## Data Frames: Introduction
@@ -66,7 +69,7 @@ library('nycflights13')
 flights <- tbl_df(flights)
 ```
 ```{r}
-head(flights)  # take a peek at the data frame
+str(flights)  # take a peek at the data frame
 ```
 
 ## Some Question
@@ -81,10 +84,16 @@ of the questions you can come up with!
 
 # Data Frame Basics
 
+## `tibble`
+- A `tibble` is a trimmed down version of `data.frame` that is more convenient 
+to work with 
+- Throughout this course, we will use the terms `tibble` and data frames 
+interchangably, which is technically incorrect, but easier to read
+
 ## Simple Example
-- Use `data.frame()` function to create a data frame
-- Arguments of `data.frame()` are vectors (of equal length) that constitute each 
-column (variable)
+- Use `tibble()` function (from `tidyverse`) to create a `tibble` data frame
+- Arguments of `tibble()` are vectors or lists (of equal length) that constitute 
+each  column (variable)
 - For example, let's create a data frame of the following table:
 
 Age | Personality | Income 
@@ -98,17 +107,17 @@ Age | Personality | Income
 ## Simple Example (cont'd)
 - We'll save the data frame to an object (I'll call mine `data`)
 ```{r}
-data <- data.frame(  # start the data.frame() 
-    age = c(24, 22, 23, 25, 22),  
-    personality = c('g', 'b', 'g', 'b', 'g'),
-    income = c(2000, 5800, 4200, 1500, 6000)
-)  # finish the data.frame() function
+data <- tibble(  # start tibble() 
+  age = c(24, 22, 23, 25, 22),  
+  personality = c('g', 'b', 'g', 'b', 'g'),
+  income = c(2000, 5800, 4200, 1500, 6000)
+)  # finish the tibble() function
 ```
 - Note that the new lines are just a matter of coding style, i.e., it makes the 
 code easier to read
 - The same data frame can be created in a single line:
 ```{r, eval=FALSE}
-data <- data.frame(age = c(24, 22, 23, 25, 22), 
+data <- tibble(age = c(24, 22, 23, 25, 22), 
 personality = c('g', 'b', 'g', 'b', 'g'), income
 = c(2000, 5800, 4200, 1500, 6000))
 ```
@@ -126,8 +135,26 @@ vectors of a data frame) in `R`
 data$age
 data$personality
 ```
-- Similar to a `.` operation in other programming languages (but note that `.` 
-has no special meaning in `R`!)
+
+## Indexing: The `[` Operator
+- The `[` operator, similar to the `$` operator, lets you reference elements of 
+an object (e.g., column vectors of a data frame) either by name *or by index*
+```{r}
+data['age']
+```
+
+## Indexing: The `[` Operator (cont'd)
+```{r}
+data[1]
+```
+
+## Indexing: The `[[` Operator (cont'd)
+- Note that when using the `[` operator, unlike `$`, you get a new data frame of 
+the indexed column, *not* a vector.
+- Use the `[[` operator if you want a vector instead
+```{r}
+data[[1]]
+```
 
 ## Indexing: Numeric Row/Column
 - Since a data frame is a table of data, you can treat it like a matrix, and 
@@ -156,7 +183,7 @@ data[c(1,4), 2:3]
 ```
 
 ## Conditional Indexing
-- Pick-out entries that match specific criteria by first creating a binary 
+- Pick out entries that match specific criteria by first creating a binary 
 vector for indexing
 ```{r}
 # find the 22-year-olds
@@ -190,55 +217,78 @@ data
 ```
 
 ## Write Data Frames to Files
-- Use `write.table()` to write data frames to (text) files
+- Use `write_tsv()` to write data frames to tab-separated (text) files
 - The syntax is
 ```
-write.table(x, file = "", append = FALSE, 
-    quote = TRUE, sep = " ", 
-    row.names = TRUE, col.names = TRUE)
+write_tsv(x, path = "", append = FALSE, 
+    col.names = !append)
 ```
 - For example, to save our sample data to a file named `data.tsv` with the 
 entries of each row separated by a tab character, write
 ```{r, eval=FALSE}
-write.table(data, file='data.tsv', sep='\t', 
-    row.names=FALSE)  # row names are rarely needed 
+write_tsv(data, path='data.tsv') 
 ```
 - Recall, the default directory is the current working directory, specified with 
 `setwd()`, and retrieved with `getwd()`
 - For more options, see documentation
 ```{r, eval=FALSE}
-?write.table
+?write_tsv
 ```
 
 ## Read Data Frames from Files
-- To read data frames that exist as text files, use the general `read.table()` 
+- To read data frames that exist as text files, use the general `read_table()` 
 function
-- Note that specific options for `read.table()` will depend on the structure of 
+- Note that specific options for `read_table()` will depend on the structure of 
 the text file you wish to read (e.g., comma-separated or tab-separated)
-- For example, to read the file we just saved, 
+- Some shortcuts for pre-defined for (commonly used) formats
 ```{r, eval=FALSE}
-data <- read.table('data.tsv', header=TRUE, sep='\t')
+read_csv(file)           # comma-separated values 
+read_tsv(file)           # tab-separated values
+read_delim(file, delim)  # custom delimiters
 ```
-- Some shortcuts for pre-defined (commonly used) formats
-```{r, eval=FALSE}
-read.csv(file)  # comma-separated values (.csv)
-read.delim(file)  # tab-separated values (.tsv)
+
+## Read Data Frames from Files (cont'd)
+- For example, to read the `tsv` file we just saved, 
+```{r}
+data <- read_tsv('data.tsv', col_names = TRUE)
 ```
+- Notice how `read_tsv()` guesses the type of your columns
+- It's good practice to specify column types manually so that
+    1. you know exactly what you want, and
+    1. you get what you want
+    
+## Specify types for columns
+- You can use the output message from the previous `read_tsv()` call as a boiler
+plate input to the `col_types` parameter, e.g., 
+```{r}
+data <- read_tsv('data.tsv', col_types = cols(
+  age = col_double(),
+  personality = col_character(),
+  income = col_double()
+), col_names = TRUE)
+```
+
+- Or, you can use a compact specification,
+```{r}
+data <- read_tsv('data.tsv', col_types = 'dcd',
+                 col_names = TRUE)
+```
+
 - See the documentation for more details
 ```{r, eval=FALSE}
-?read.table
+?read_delim
 ```
 
 ## Read Data from Online Database
-- `read.table()` can also load data frames from an online database
+- `read_*()` can also load data frames from an online database
 - While loading data directly from the web is not recommended, this can be 
 useful when making a local copy of an online database
 - For example, to make a local copy of the dataset saved in 
 `https://goo.gl/MGzatX`
 ```{r, eval=FALSE}
 address <- 'https://goo.gl/MGzatX'
-data <- read.table(address, header=TRUE)
-write.table(data, file='data.tsv', sep='\t')
+data <- read_tsv(address)
+write_tsv(data, path='data.tsv')
 ```
 - Note that you can read data in one format (e.g., comma-separated) and save 
 the local copy in another (e.g., tab-separated)
@@ -249,8 +299,8 @@ the local copy in another (e.g., tab-separated)
 - We'll use a sample dataset from `https://goo.gl/epWdDj`
 - First, load the data into your workspace
 ```{r, cache=TRUE}
-address <- 'https://goo.gl/epWdDj'
-autompg <- read.table(address, header=TRUE)
+address <- 'https://goo.gl/MaHL7q'
+autompg <- read_tsv(address)
 ```
 - The data contains fuel consumption data of 398 vehicles 
 - Originally from the [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml/)
@@ -268,23 +318,29 @@ str(autompg, strict.width='cut')
 ```
 
 ## `Factor`s
-- Note that some variables are `factor`s
-- A `factor` is a data frame representation of categorical variables
+- Note that some variables should be `factor`s -- a data frame representation of 
+categorical variables
+
+- Use `factor()` to force varaible into factor variables
+```{r}
+autompg$horsepower <- factor(autompg$horsepower)
+autompg$year <- factor(autompg$year)
+autompg$model <- factor(autompg$model)
+autompg$make <- factor(autompg$make)
+```
 - The entries of a `factor` variable is defined by `levels`
 ```{r, eval=FALSE}
 levels(autompg$make)
 ```
+
+## `unique` values
 - Use `unique()` to list the unique values of any variable
 ```{r}
-unique(autompg$year)
-```
-- Use `factor()` to make a factor varaible from non-factor variables
-```{r}
-autompg$year <- factor(autompg$year)
+unique(autompg$cylinders)
 ```
 
 ## Basic `plot`s
-- Use `plot()` to generate quick and dirty (but often helpful) plots
+- Use `plot()` to generate quick and dirty (but sometimes helpful) plots
 - By default, `plot()` will generate histograms of categorical variables 
 (`factor`s) and scatter plots (with respect to row index) of continuous 
 variables
@@ -318,7 +374,8 @@ pairs(autompg[, c('mpg', 'weight', 'year')])
     - make the `cylinders` variable of the buick data frame into a factor
     - plot a histogram of the buick's `cylinders`
 - These are just (very) basic operations
-- For more complicated operations, we'll use `dlyr` and `tidyr` (covered next)
+- For more complicated operations, we'll use `dlyr` and `tidyr` (both part of 
+`tidyverse` and covered next)
 - For more sophisticated plots, we'll use `ggplot2` (covered in the next session)
 
 # Exercise Solution
@@ -341,7 +398,10 @@ plot(buick$cylinders)
 ## Introduction to `dplyr`
 - `dplyr` is a package that provides a convenient framework (along with a 
 handful of useful functions) for wrangling data (frames)
-- Install and load the `dplyr` package like you would any other `R` package
+- `dplyr` is a part of the `tidyverse`, so if you load `tidyverse`, `dplyr` is
+also loaded
+- You can also, but don't have to, install and load the `dplyr` as a standalone 
+package like you  would any other `R` package
 ```{r, eval=FALSE}
 # Install, if you haven't already.
 # Only need to do this once on a single machine.
@@ -609,11 +669,11 @@ Each row represents an observation/instance
 ```
 - Consider the following (fictional) data frame of students' homework grades
 
-ID | HW1 | HW2 | HW3 | HW4 | HW5
---- | --- | --- | --- | --- | ---
-jamie | 6 | 7 | 3 | 5 | 8
-cersei | 8 | 5 | 2 | 1 | 9
-hodor | 9 | 10 | 9 | 3 | 10
+ID | HW1 | HW2 | HW3 
+--- | --- | --- | --- 
+jamie | 6 | 7 | 3 
+cersei | 8 | 5 | 2 
+hodor | 9 | 10 | 9 
 
 - What are the variables of this data?
 - What are the potential issues with this representation?
@@ -629,14 +689,17 @@ ID | HW | Score
 jamie | 1 | 6
 jamie | 2 | 7
 $\vdots$ | $\vdots$ | $\vdots$
-hodor | 4 | 3
-hodor | 5 | 10
+hodor | 2 | 10
+hodor | 3 | 9
 
 - `tidyr` is a package that provides a tools for converting data between *long* 
 and *wide* forms
 
 ## Introduction to `tidyr`: Getting Started
-- Install and load the `tidyr` package like you would any other `R` package
+- `tidyr` is also part of the `tidyverse`, so if you load `tidyverse`, `tidyr` 
+is also loaded
+- You can also, but don't have to, install and load `tidyr` as a standalone 
+package like you  would any other `R` package
 ```{r, eval=FALSE}
 # Install, if you haven't already.
 # Only need to do this once on a single machine.
@@ -650,15 +713,16 @@ library('tidyr')
 ## Introduction to `tidyr`: Getting Started (cont'd)
 - Create some random data
 ```{r}
-grades <- 
-    data.frame(ID = c('jamie', 'cersei', 'hodor'),
-               matrix(runif(15, 1, 10), nrow=3))
-colnames(grades) <-  c('ID',  paste0('HW', 1:5))
-grades$info <- c('male/lannister', 
+grades <- tibble(
+  ID = c('jamie', 'cersei', 'hodor'), 
+  HW1 = runif(3, 1, 10),
+  HW2 = runif(3, 1, 10),
+  HW3 = runif(3, 1, 10),
+  info = c('male/lannister', 
                  'female/lannister',
-                 'male/stark')
+                 'male/stark'))
+grades
 ```
-- Take some time to understand what just happened
 
 ## Create *long* data with `gather()`
 - With the `grades` data, we would like to create a data frame in the form of
@@ -677,7 +741,7 @@ gather(data, key, value, ...)
 
 ## Create *long* data with `gather()` (cont'd)
 ```{r, results='hide'}
-grades.tidy <- gather(grades, HW, score, HW1:HW5)
+grades.tidy <- gather(grades, HW, score, HW1:HW3)
 grades.tidy
 ```
 ```{r, echo=FALSE}
@@ -707,7 +771,7 @@ operator `%>%`
 chained operation
 ```{r}
 grades.final <- grades %>%
-    gather(HW, score, HW1:HW5) %>%
+    gather(HW, score, HW1:HW3) %>%
     separate(info, into=c('sex', 'house'), sep='/')
 ```
 - `tidyr` verbs can also be chained with `dplyr` verbs (and any other function
@@ -717,13 +781,8 @@ results in a new data frame)
 ## Exercise
 - Create some random data
 ```{r}
-finance <- 
-    data.frame(ID = c('leia', 'han', 'luke'),
-               matrix(rnorm(18, 1e4, 5e3), nrow=3))
-colnames(finance) <- 
-    c('ID', 
-      paste('Income', 2013:2015, sep='_'),
-      paste('Expense', 2013:2015, sep='_'))
+address <- 'https://goo.gl/0hFk2w'
+finance <- read_tsv(address)
 ```
 1. Tidy the data to fit the form
 
@@ -764,6 +823,10 @@ finance.summary
 - `rbind`: concatenate rows
 - `cbind`: concatenate columns
 
+- For data frames, `bind_rows()` and `bind_cols()` from `dplyr` is usually much 
+faster.
+
+
 ## Example (with matrix, but works with data frames too)
 ```{r}
 A <- matrix(1:4, 2, 2)
@@ -771,7 +834,6 @@ B <- matrix(5:8, 2, 2)
 rbind(A, B)
 cbind(A, B)
 ```
-
 
 ## Introduction to `join`s
 - Sometimes, you will find relevant data across multiple datasets, e.g., a list 
@@ -793,15 +855,17 @@ prior to further analysis
 ## Example Datasets
 - For illustration, let's create two data frames
 ```{r}
-info <- data.frame(
-    name=c('tony', 'tony', 'rey'),
-    job=c('scientist', 'tiger', 'scavenger'),
-    score=rnorm(3))
+info <- tibble(
+  name=c('tony', 'tony', 'rey'),
+  job=c('scientist', 'tiger', 'scavenger'),
+  score=rnorm(3)
+)
 
-power <- data.frame(
-    name=c('tony', 'hank', 'rey'),
-    job=c('scientist', 'scientist', 'scavenger'),
-    strength=rexp(3))
+power <- tibble(
+  name=c('tony', 'hank', 'rey'),
+  job=c('scientist', 'scientist', 'scavenger'),
+  strength=rexp(3)
+)
 ```
 - How is an observation (row) uniquely identified?
 
