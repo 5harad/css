@@ -9,6 +9,7 @@ output:
     fonttheme: professionalfonts
     highlight: zenburn
     theme: boxes
+    toc: yes
 ---
 
 ## Dependencies
