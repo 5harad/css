@@ -1,7 +1,6 @@
 ---
 title: "`R` crash course - Visualization"
 author: "Jongbin Jung"
-date: "January 14-15, 2016"
 output: 
   beamer_presentation: 
     fig_height: 3
