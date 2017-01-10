@@ -369,12 +369,12 @@ summary(obj)  # display summary of obj
 ## Control Flow
 - `if` statements
 ```{r, eval=FALSE}
-if (condition) {
-    # stuff to do when condition is TRUE
-} else if(other_condition) {  # (OPTIONAL)
-    # stuff to do if other_condition is TRUE
-} else {  # (OPTIONAL)
-    # stuff to do if all other conditions are FALSE
+if (condition) { 
+  # stuff to do when condition is TRUE
+} else if(other_condition) {  # (OPTIONAL) 
+  # stuff to do if other_condition is TRUE
+} else {  # (OPTIONAL) 
+  # stuff to do if all other conditions are FALSE
 }
 ```
 
@@ -393,37 +393,37 @@ more sense, but in general, loops should be avoided when writing `R`
 ## Loops
 - `for` statements
 ```{r, eval=FALSE}
-for (ind in sequence/set) {  
-    # iterate over sequence or elements of a set
-    # do stuff
+for (ind in sequence/set) {   
+  # iterate over sequence or elements of a set 
+  # do stuff
 }
 ```
 - `while` statements
 ```{r, eval=FALSE}
-while (condition) {
-    # stuff to do while the condition is TRUE
-    # the condition must become FALSE at some point!
+while (condition) { 
+  # stuff to do while the condition is TRUE 
+  # the condition must become FALSE at some point!
 }
 ```
 
 ## Loops: Example
 ```{r}
-for (i in 1:3) {
-    print(paste('iteration', i))
+for (i in 1:3) { 
+  print(paste('iteration', i))
 }
 
-while (i >= 0) {
-    print(paste('de-iteration', i))
-    i <- i - 1  # beware of infinite loops!
+while (i >= 0) { 
+  print(paste('de-iteration', i))
+  i <- i - 1  # beware of infinite loops!
 }
 ```
 
 ## User Defined Functions
 - Write your own functions in the form
 ```{r, eval=FALSE}
-name_of_function <- function(arguments) {
-    # do some stuff with arguments
-    return(result)
+name_of_function <- function(arguments) { 
+  # do some stuff with arguments 
+  return(result)
 }
 ```
 - You can use your functions like any other function, e.g.,
@@ -435,18 +435,18 @@ name_of_function(arguments)  # gives you the 'result'
 - Write a function that will take a vector in $\mathbb{R}^3$ and tell you if you 
 can make a triangle or not
 ```{r}
-is_good <- function(vec) {
-    if (length(vec) != 3) {
-        # it's always a good idea to make sure your 
-        # function gets what it expects to get
-        stop('is_good requires a vector of length 3')
+is_good <- function(vec) { 
+  if (length(vec) != 3) {
+      # it's always a good idea to make sure your 
+      # function gets what it expects to get
+      stop('is_good requires a vector of length 3')
+  }
+  for (i in 1:3) {
+    if (vec[i] > sum(vec[-i])) {
+      return(FALSE)
     }
-    for (i in 1:3) {
-        if (vec[i] > sum(vec[-i])) {
-            return(FALSE)
-        }
-    }
-    return(TRUE)
+  }
+  return(TRUE)
 }
 ```
 
@@ -485,15 +485,15 @@ apply(X, 2, var)  # variance of columns
 ## Answer 1: A (not too good) Way
 ```{r}
 system.time({  # measure execution time
-N <- 1e5; 
-m <- 0
-for (i in 1:N) {
+  N <- 1e5; 
+  m <- 0
+  for (i in 1:N) {
     X <- runif(3)
     if (is_good(X)) {
         m <- m + 1
     }
-}
-cat(sprintf('%.2f%%\n', m / N * 100))
+  }
+  cat(sprintf('%.2f%%\n', m / N * 100))
 })
 ```
 

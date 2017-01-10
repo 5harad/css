@@ -67,7 +67,7 @@ library('nycflights13')
 
 ## Data Frames: First Impression (cont'd)
 ```{r, echo=FALSE}
-flights <- tbl_df(flights)
+flights <- as_tibble(flights)
 ```
 ```{r}
 str(flights)  # take a peek at the data frame
@@ -221,8 +221,7 @@ data
 - Use `write_tsv()` to write data frames to tab-separated (text) files
 - The syntax is
 ```
-write_tsv(x, path = "", append = FALSE,
-    col.names = !append)
+write_tsv(x, path = "")
 ```
 - For example, to save our sample data to a file named `data.tsv` with the
 entries of each row separated by a tab character, write
@@ -413,6 +412,17 @@ library('dplyr')
 - We'll primarily use the `flights` data frame from the `nycflights13` package
 in this part
 
+
+## Work with `tibble`
+- To be consistent, and avoid surprises, make sure you're working with a 
+`tibble` and **NOT** a `data.frame`. 
+- Since `tibble`s are just an opinionated `data.frame`, you can make sure you're
+working with a `tibble` by converting your `data.frame`s to `tibble`s with 
+`as_tibble()`
+```{r}
+flights <- as_tibble(flights)
+```
+
 ## Verbs
 - A *verb* in the world of `dplyr` is a function that takes a data frame as its
 first argument, and returns another data frame as a result
@@ -596,11 +606,13 @@ new data frames
 (i.e., you'll end up with a workspace full of intermediate results)
 ```{r, eval=FALSE}
 flights_by_date <- group_by(flights, year, month, day)
-summary_by_date <- summarize(flights_by_date,
-    arr = mean(arr_delay, na.rm=TRUE),
-    dep = mean(dep_delay, na.rm=TRUE))
-big_delay_dates <- filter(summary_by_date,
-                          arr > 30 | dep > 30)
+summary_by_date <- summarize(
+  flights_by_date,
+  arr = mean(arr_delay, na.rm=TRUE),  
+  dep = mean(dep_delay, na.rm=TRUE)) 
+big_delay_dates <- filter(
+  summary_by_date,
+  arr > 30 | dep > 30)
 ```
 - This method might be prefered if you need the intermediate results in
 the future
@@ -611,15 +623,23 @@ the future
 its left-hand side, and uses it as the first argument (data frame) for the verb
 on the right-hand side
 ```{r, eval=FALSE}
-big_delay_dates <-
-    group_by(flights, year, month, day) %>%
-    summarize(arr = mean(arr_delay, na.rm=TRUE),
-              dep = mean(dep_delay, na.rm=TRUE)) %>%
-    filter(arr > 30 | dep > 30)
+big_delay_dates <- flights %>% 
+  group_by(year, month, day) %>% 
+  summarize(arr = mean(arr_delay, na.rm=TRUE), 
+            dep = mean(dep_delay, na.rm=TRUE)) %>% 
+  filter(arr > 30 | dep > 30)
 ```
 - No need to save intermediate results
 - Easier to read (i.e., you can follow the operations step-by-step without too
 much mental accounting)
+
+## The Pipe Operator `%>%` -- Best Practice
+- Always using the pipe operator -- across multiple lines -- makes it easier to 
+add/remove/move things around, even for single expressions, i.e.,
+```{r, eval=FALSE}
+flights_by_date <- flights %>% 
+  group_by(year, month, day)
+```
 
 ## `dplyr`: Exercise
 - With the `flights` data
@@ -636,28 +656,27 @@ much mental accounting)
 
 ## Solution 1
 ```{r, results='hide'}
-speed_by_carrier <-
-    group_by(flights, carrier) %>%
-    mutate(speed = distance / air_time * 60) %>%
-    summarize(avg_speed = mean(speed, na.rm=TRUE)) %>%
-    arrange(desc(avg_speed))
+speed_by_carrier <- flights %>% 
+  group_by(carrier) %>% 
+  mutate(speed = distance / air_time * 60) %>% 
+  summarize(avg_speed = mean(speed, na.rm=TRUE)) %>% 
+  arrange(desc(avg_speed))
 speed_by_carrier
 ```
 ```{r, echo=FALSE}
-data.frame(head(speed_by_carrier, 8))
+head(as_tibble(speed_by_carrier, 8))
 ```
 
 ## Solution 2
 ```{r, results='hide'}
-april_long_flights <-
-    group_by(flights, month, carrier) %>%
-    filter(month == 4 & hour > 10) %>%
-    summarize(avg = mean(hour, na.rm=TRUE),
-              count = n())
+april_long_flights <- flights %>% 
+  group_by(month, carrier) %>% 
+  filter(month == 4 & hour > 10) %>% 
+  summarize(avg = mean(hour, na.rm=TRUE), count = n())
 april_long_flights
 ```
 ```{r, echo=FALSE}
-data.frame(head(april_long_flights, 8))
+head(as_tibble(april_long_flights, 8))
 ```
 
 # Reshape Data with `tidyr`
@@ -719,9 +738,9 @@ grades <- tibble(
   HW1 = runif(3, 1, 10),
   HW2 = runif(3, 1, 10),
   HW3 = runif(3, 1, 10),
-  info = c('male/lannister',
-                 'female/lannister',
-                 'male/stark'))
+  info = c('male/lannister', 
+           'female/lannister', 
+           'male/stark'))
 grades
 ```
 
@@ -742,7 +761,8 @@ gather(data, key, value, ...)
 
 ## Create *long* data with `gather()` (cont'd)
 ```{r, results='hide'}
-grades.tidy <- gather(grades, HW, score, HW1:HW3)
+grades.tidy <- grades %>%
+  gather(HW, score, HW1:HW3)
 grades.tidy
 ```
 ```{r, echo=FALSE}
@@ -756,9 +776,8 @@ variables, e.g., splitting a `date` column to `year`, `month`, and `day`
 `sex` and `house`
 - We can split such columns to multiple variables with the `separate()` verb in `tidyr`
 ```{r, results='hide'}
-grades.split <-
-    separate(grades.tidy, info,
-             into = c('sex', 'house'), sep = '/')
+grades.split <- grades.tidy %>% 
+  separate(info, into = c('sex', 'house'), sep = '/')
 grades.split
 ```
 ```{r, echo=FALSE}
@@ -771,9 +790,9 @@ operator `%>%`
 - For example, we can do the previous operations on the `grades` data with the
 chained operation
 ```{r}
-grades.final <- grades %>%
-    gather(HW, score, HW1:HW3) %>%
-    separate(info, into=c('sex', 'house'), sep='/')
+grades.final <- grades %>% 
+  gather(HW, score, HW1:HW3) %>% 
+  separate(info, into=c('sex', 'house'), sep='/')
 ```
 - `tidyr` verbs can also be chained with `dplyr` verbs (and any other function
 that qualifies as a verb, i.e., takes a data frame as the first argument and
@@ -781,7 +800,7 @@ results in a new data frame)
 
 ## Exercise
 - Create some random data
-```{r}
+```{r, message=FALSE, warning=FALSE}
 address <- 'https://goo.gl/0hFk2w'
 finance <- read_tsv(address)
 ```
@@ -801,9 +820,9 @@ ID | type | year | amount
 
 ## Solution 1
 ```{r, results='hide'}
-finance <- finance %>%
-    gather(year, amount, 2:7) %>%
-    separate(year, c('type', 'year'), sep='_')
+finance <- finance %>% 
+  gather(year, amount, 2:7) %>% 
+  separate(year, c('type', 'year'), sep='_')
 finance
 ```
 ```{r, echo=FALSE}
@@ -812,9 +831,9 @@ head(finance, 8)
 
 ## Solution 2
 ```{r}
-finance.summary <- finance %>%
-    group_by(ID, type) %>%
-    summarize(mean=mean(amount), total=sum(amount))
+finance.summary <- finance %>% 
+  group_by(ID, type) %>% 
+  summarize(mean=mean(amount), total=sum(amount))
 finance.summary
 ```
 
