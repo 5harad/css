@@ -915,6 +915,18 @@ inner_join(info, power, by=c('name', 'job'))
 full_join(info, power, by=c('name', 'job'))
 ```
 
+## Tip: Replace `NA` entries
+
+- To replace *all* `NA` entries in a data frame --- assuming you  know exactly
+what you want to change them to! --- index by `is.na` and  re-assign, e.g.,
+```{r, warning=FALSE}
+everyone <- full_join(info, power, by=c('name', 'job'))
+
+# Replace the NAs with 0 (BAD IDEA!)
+everyone[is.na(everyone)] <- 0
+everyone
+```
+
 ## Reference
 - A great "cheat sheet" for wrangling data with `dplyr` and `tidyr` is available
 for free at
