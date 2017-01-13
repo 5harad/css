@@ -249,8 +249,8 @@ p
 1. Plot a density histogram of 1,000 random samples from a standard normal 
 distribution using binwidth 0.5
 (hint: use `rnorm()`)
-2. Plot the (smooth) density of the population (`pop`) variable from the 
-`economics` data
+2. Use `geom_density()` to plot the (smooth) density of the population 
+(`pop`) variable from the  `economics` data
 
 ## WARNING
 - Solutions to the exercise are presented in the next slide
@@ -387,27 +387,75 @@ p
 ```
 
 ## Exercise
-1. Using the `economics` dataset, plot lines for the values of `unemploy` and 
+1. With the `mpg` dataset, generate a scatter plot with `hwy` on the $x$-axis
+and `cty` on the $y$-axis. Let the `color` represent to `class` and `size` 
+represent `cyl`. Also set `alpha=.3`.
+
+2. From the `quakes` plot on the previous slide, replace the blue colored 
+points with *one big red star* (size=5, shape=8) showing which location had 
+the largest magnitude
+(hint: you'll need to crate another data frame consisting of the single
+observation you wish to plot)
+
+3. Using the `economics` dataset, plot lines for the values of `unemploy` and 
 `pop` with different linetypes, against `date` as the horizontal axis. 
 (hint: you'll need to select the variables you need, and tidy the data into 
 long format)
 
-2. With the `quakes` dataset, generate a scatter plot of the mean `depth` for 
-seismic events reported by each of the 102 `stations`, with the `stations` on 
-the horizontal ($x$) axis. Let the colors of each point represent each station, 
-the size represent the ratio `min(mag)/max(mag)` within the seismic events 
-reported from each station, and set `alpha=.6`. (hint: group and summarize 
-the data with `dplyr` first)
 
-3. With the `mpg` dataset, generate a scatter plot with `hwy` on the $x$-axis
-and `cty` on the $y$-axis. Let the `color` represent to `class` and `size` 
-represent `cyl`. Also set `alpha=.3`.
 
 ## WARNING
 - Solutions to the exercise are presented in the next slide
 - Try the exercise before proceeding!
 
 ## Solution 1
+```{r, eval=FALSE}
+p <- ggplot(mpg, aes(x=hwy, y=cty)) +
+  geom_point(alpha=.3, 
+             aes(color=class, size=cyl))
+p
+```
+
+## Solution 1 (figure)
+```{r, echo=FALSE, fig.width=5, fig.height=3.5}
+p <- ggplot(mpg, aes(x=hwy, y=cty)) +
+  geom_point(alpha=.3, aes(color=class, size=cyl))
+p
+```
+
+## Solution 2 
+```{r, eval=FALSE}
+# Find the largest magnitude observation
+quakes_max_mag <- quakes %>% 
+  arrange(desc(mag)) %>%
+  slice(1)
+
+# Generate plot
+p <- ggplot(quakes, aes(x=long, y=lat)) +
+  geom_point(alpha=.3, aes(size=mag)) +
+  geom_point(data=quakes_max_mag, 
+             size=5,
+             color='red',
+             shape=8)
+p
+```
+
+## Solution 2 (figure)
+```{r, echo=FALSE, fig.width=5, fig.height=3.5}
+quakes_max_mag <- quakes %>% 
+  arrange(desc(mag)) %>%
+  slice(1)
+
+p <- ggplot(quakes, aes(x=long, y=lat)) +
+  geom_point(alpha=.3, aes(size=mag)) +
+  geom_point(data=quakes_max_mag, 
+             size=5,
+             color='red',
+             shape=8)
+p
+```
+
+## Solution 3
 ```{r, eval=FALSE}
 # first, get the data into the right format
 econ_tidy <- economics %>% 
@@ -420,7 +468,7 @@ p <- ggplot(econ_tidy, aes(x=date, y=value)) +
 p
 ```
 
-## Solution 1 (figure)
+## Solution 3 (figure)
 ```{r, echo=FALSE, fig.width=5, fig.height=3.5}
 econ_tidy <- economics %>% 
   select(date, unemploy, pop) %>% 
@@ -430,48 +478,6 @@ p <- ggplot(econ_tidy, aes(x=date, y=value)) +
   geom_line(aes(linetype=var))
 p
 ```
-
-## Solution 2 
-```{r, eval=FALSE}
-# summarize the data
-quakes_by_stations <- quakes %>% 
-  group_by(stations) %>% 
-  summarize(mdepth=mean(depth),  
-            rmag=min(mag)/max(mag))
-
-# generate plot
-p <- ggplot(quakes_by_stations, 
-            aes(x=stations, y=mdepth)) +
-  geom_point(alpha=.6, aes(size=rmag, color=stations))
-p
-```
-
-## Solution 2 (figure)
-```{r, echo=FALSE, fig.width=5, fig.height=3.5}
-quakes_by_stations <- quakes %>%
-    group_by(stations) %>%
-    summarize(mdepth=mean(depth), rmag=min(mag)/max(mag))
-
-p <- ggplot(quakes_by_stations, aes(x=stations, y=mdepth)) +
-  geom_point(alpha=.6, aes(size=rmag, color=stations))
-p
-```
-
-## Solution 3
-```{r, eval=FALSE}
-p <- ggplot(mpg, aes(x=hwy, y=cty)) +
-  geom_point(alpha=.3, 
-             aes(color=class, size=cyl))
-p
-```
-
-## Solution 3 (figure)
-```{r, echo=FALSE, fig.width=5, fig.height=3.5}
-p <- ggplot(mpg, aes(x=hwy, y=cty)) +
-  geom_point(alpha=.3, aes(color=class, size=cyl))
-p
-```
-
 
 # Scales, Labels, and More
 
