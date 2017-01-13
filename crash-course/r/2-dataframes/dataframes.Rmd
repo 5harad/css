@@ -196,9 +196,9 @@ data[ind, ]  # index rows by binary vector ind
     - when you index rows of a single column, the result is a vector
     - when you index multiple columns, the result is a new data frame
 - You can chain indices to pin-point elements of a data frame
-- For example, all of the following operations are equivalent
+- For example, all of the following operations are (almost) equivalent -- can you tell how the first two are different from the last two?
 ```{r, eval=FALSE}
-# Equivalent operations to get the age of
+# (Almost) Equivalent operations to get the age of
 # third observation (row 3)
 data[3, 1]  # if you know that 'age' is column 1
 data[3, 'age']
