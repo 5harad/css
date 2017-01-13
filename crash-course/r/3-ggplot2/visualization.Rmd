@@ -402,6 +402,38 @@ observation you wish to plot)
 (hint: you'll need to select the variables you need, and tidy the data into 
 long format)
 
+## Goal: Exercise 1
+```{r, echo=FALSE, fig.width=5, fig.height=3.5}
+p <- ggplot(mpg, aes(x=hwy, y=cty)) +
+  geom_point(alpha=.3, aes(color=class, size=cyl))
+p
+```
+
+## Goal: Exercise 2
+```{r, echo=FALSE, fig.width=5, fig.height=3.5}
+quakes_max_mag <- quakes %>% 
+  arrange(desc(mag)) %>%
+  slice(1)
+
+p <- ggplot(quakes, aes(x=long, y=lat)) +
+  geom_point(alpha=.3, aes(size=mag)) +
+  geom_point(data=quakes_max_mag, 
+             size=5,
+             color='red',
+             shape=8)
+p
+```
+
+## Goal: Exercise 3
+```{r, echo=FALSE, fig.width=5, fig.height=3.5}
+econ_tidy <- economics %>% 
+  select(date, unemploy, pop) %>% 
+  gather(var, value, unemploy:pop)
+
+p <- ggplot(econ_tidy, aes(x=date, y=value)) +
+  geom_line(aes(linetype=var))
+p
+```
 
 
 ## WARNING
@@ -422,6 +454,7 @@ p <- ggplot(mpg, aes(x=hwy, y=cty)) +
   geom_point(alpha=.3, aes(color=class, size=cyl))
 p
 ```
+
 
 ## Solution 2 
 ```{r, eval=FALSE}
@@ -455,6 +488,7 @@ p <- ggplot(quakes, aes(x=long, y=lat)) +
 p
 ```
 
+
 ## Solution 3
 ```{r, eval=FALSE}
 # first, get the data into the right format
@@ -479,7 +513,8 @@ p <- ggplot(econ_tidy, aes(x=date, y=value)) +
 p
 ```
 
-# Scales, Labels, and More
+
+# Labels, Scales, and More
 
 ## Labels
 - Three major labels on a plot would be
@@ -504,6 +539,18 @@ p <- ggplot(economics, aes(x=date, y=unemploy)) +
        y='Unemployment')
 p
 ```
+
+## Labels: Pro tip!
+
+```{r, fig.height=2.5, fig.width=5}
+p <- ggplot(economics, aes(x=date, y=unemploy)) +
+  geom_line() +
+  labs(title='Unemployment by time', 
+       x='\nDate (by month)',
+       y='Unemployment\n')
+p
+```
+
 
 ## Scales
 - The mapping between data and `aes`thetics is controled via **scales**
@@ -551,8 +598,10 @@ we would write
 ```{r, eval=FALSE}
 p <- ggplot(economics, aes(x=date, y=unemploy)) +
   geom_line() +
-  scale_x_date(labels=date_format('%Y'), 
-               breaks=date_breaks("15 years"))
+  scale_x_date(
+    labels=date_format('%Y'),  
+    breaks=date_breaks("15 years")
+    )
 p
 ```
 
@@ -624,6 +673,78 @@ p <- p + theme(legend.position=c(0,1),
                legend.justification=c(0,0))
 ```
 
+## Legends: Position Top Example
+```{r, eval=FALSE}
+p <- ggplot(mpg_suv, aes(x=hwy, y=cty)) +
+  geom_point(aes(color=issuv)) +
+  scale_color_manual( 
+    limits=c(FALSE, TRUE), values=c('blue', 'red'),
+    breaks=c(TRUE, FALSE), labels=c('SUV', 'Other') 
+    ) +
+  theme(legend.position='top')
+p
+```
+
+## Legends: Position Top Example (figure)
+```{r, echo=FALSE, fig.height=5, fig.width=6}
+p <- ggplot(mpg_suv, aes(x=hwy, y=cty)) +
+  geom_point(aes(color=issuv)) +
+  scale_color_manual( 
+    limits=c(FALSE, TRUE), values=c('blue', 'red'),
+    breaks=c(TRUE, FALSE), labels=c('SUV', 'Other') 
+    ) +
+  theme(legend.position='top')
+p
+```
+
+## Legends: Position Example
+```{r, eval=FALSE}
+p <- ggplot(mpg_suv, aes(x=hwy, y=cty)) +
+  geom_point(aes(color=issuv)) +
+  scale_color_manual( 
+    limits=c(FALSE, TRUE), values=c('blue', 'red'),
+    breaks=c(TRUE, FALSE), labels=c('SUV', 'Other') 
+    ) +
+  theme(legend.position=c(1, 0))
+p
+```
+
+## Legends: Position Example (figure)
+```{r, echo=FALSE, fig.height=5, fig.width=6}
+p <- ggplot(mpg_suv, aes(x=hwy, y=cty)) +
+  geom_point(aes(color=issuv)) +
+  scale_color_manual( 
+    limits=c(FALSE, TRUE), values=c('blue', 'red'),
+    breaks=c(TRUE, FALSE), labels=c('SUV', 'Other') 
+    ) +
+  theme(legend.position=c(1, 0))
+p
+```
+
+## Legends: Position Example
+```{r, eval=FALSE}
+p <- ggplot(mpg_suv, aes(x=hwy, y=cty)) +
+  geom_point(aes(color=issuv)) +
+  scale_color_manual( 
+    limits=c(FALSE, TRUE), values=c('blue', 'red'),
+    breaks=c(TRUE, FALSE), labels=c('SUV', 'Other') 
+    ) +
+  theme(legend.position=c(1, 0), legend.justification = c(1, 0))
+p
+```
+
+## Legends: Position Example (figure)
+```{r, echo=FALSE, fig.height=5, fig.width=6}
+p <- ggplot(mpg_suv, aes(x=hwy, y=cty)) +
+  geom_point(aes(color=issuv)) +
+  scale_color_manual( 
+    limits=c(FALSE, TRUE), values=c('blue', 'red'),
+    breaks=c(TRUE, FALSE), labels=c('SUV', 'Other') 
+    ) +
+  theme(legend.position=c(1, 0), legend.justification = c(1, 0))
+p
+```
+
 ## Legends: Guides
 - `guides()` is used to set the legend type for specific `aes`thetics
 - A common use-case is, for example, to hide legends by setting the `aes`thetic 
@@ -670,6 +791,10 @@ p <- ggplot(quakes, aes(x=long, y=lat)) +
   guides(color='none')
 p
 ```
+
+## Legends: Remarks
+- *Lots* of legend options (and more!) can be controlled via `theme()`
+- Get familiar with the options in `?theme` to become a real pro!
 
 ## Facets
 - Facets let you divide a plot into subplots based on the values of a (discrete) variable
