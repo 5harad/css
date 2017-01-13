@@ -764,8 +764,7 @@ gather(data, key, value, ...)
 
 ## Create *long* data with `gather()` (cont'd)
 ```{r, results='hide'}
-grades.tidy <- grades %>%
-  gather(HW, score, HW1:HW3)
+grades.tidy <- gather(grades, HW, score, HW1:HW3)
 grades.tidy
 ```
 ```{r, echo=FALSE}
@@ -778,9 +777,14 @@ variables, e.g., splitting a `date` column to `year`, `month`, and `day`
 - From the `grades` data, notice that the `info` column combines two variables:
 `sex` and `house`
 - We can split such columns to multiple variables with the `separate()` verb in `tidyr`
+
+## Split a Column to with `separate()` (cont'd)
 ```{r, results='hide'}
-grades.split <- grades.tidy %>% 
-  separate(info, into = c('sex', 'house'), sep = '/')
+grades.split <- separate(
+  grades.tidy, info, 
+  into = c('sex', 'house'), 
+  sep = '/'
+  )
 grades.split
 ```
 ```{r, echo=FALSE}
