@@ -545,6 +545,11 @@ summarize(flights,
 
 - More useful as a grouped operation (see next)
 
+## Split-Apply-Combine
+
+![Illustration of SAC](../img/sac.jpg)
+
+
 ## Grouped Operations
 - If a data frame is *grouped*, operations are applied to each group separately,
 and the results are combined back to a single data frame
