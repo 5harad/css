@@ -322,7 +322,6 @@ categorical variables
 
 - Use `factor()` to force varaible into factor variables
 ```{r}
-autompg$horsepower <- factor(autompg$horsepower)
 autompg$year <- factor(autompg$year)
 autompg$model <- factor(autompg$model)
 autompg$make <- factor(autompg$make)
