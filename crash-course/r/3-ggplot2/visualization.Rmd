@@ -81,15 +81,15 @@ lines(B, col='blue')
 the variables of interest are `time`,  `score`, and `group`)
 ```{r}
 df <- tibble(time=Time, A=A, B=B )
-df.tidy <- gather(df, key=group, value=score, A:B)
+df_tidy <- gather(df, key=group, value=score, A:B)
 ```
-- What does `df.tidy` look like?
+- What does `df_tidy` look like?
 - Then, use `ggplot2` to *visualize* the data frame (this is what we'll cover 
 in this session, so you're not supposed to understand the following code)
 
 ## `ggplot2` Code and Plot
 ```{r, fig.height=2, fig.width=3}
-p <- ggplot(df.tidy, aes(x=time, y=score)) + 
+p <- ggplot(df_tidy, aes(x=time, y=score)) + 
   geom_line(aes(color=group))
 p
 ```
@@ -410,23 +410,23 @@ represent `cyl`. Also set `alpha=.3`.
 ## Solution 1
 ```{r, eval=FALSE}
 # first, get the data into the right format
-econ.tidy <- economics %>% 
+econ_tidy <- economics %>% 
   select(date, unemploy, pop) %>% 
   gather(var, value, unemploy:pop)
 
 # generate the plot
-p <- ggplot(econ.tidy, aes(x=date, y=value)) +
+p <- ggplot(econ_tidy, aes(x=date, y=value)) +
   geom_line(aes(linetype=var)) 
 p
 ```
 
 ## Solution 1 (figure)
 ```{r, echo=FALSE, fig.width=5, fig.height=3.5}
-econ.tidy <- economics %>% 
+econ_tidy <- economics %>% 
   select(date, unemploy, pop) %>% 
   gather(var, value, unemploy:pop)
 
-p <- ggplot(econ.tidy, aes(x=date, y=value)) +
+p <- ggplot(econ_tidy, aes(x=date, y=value)) +
   geom_line(aes(linetype=var))
 p
 ```
@@ -574,10 +574,10 @@ red points for `class=suv` and blue points otherwise
 ```{r, eval=FALSE}
 # First, create a new column in the data indicating 
 # whether the entry has class suv or not
-mpg.suv <- mpg %>% 
+mpg_suv <- mpg %>% 
   mutate(issuv=ifelse(class=='suv', TRUE, FALSE))
 # Generate the plot with a manual color scale
-p <- ggplot(mpg.suv, aes(x=hwy, y=cty)) +
+p <- ggplot(mpg_suv, aes(x=hwy, y=cty)) +
   geom_point(aes(color=issuv)) +
   scale_color_manual( 
     limits=c(FALSE, TRUE), values=c('blue', 'red'),
@@ -590,10 +590,10 @@ p
 ```{r, echo=FALSE, fig.height=5, fig.width=6}
 # First, create a new column in the data indicating 
 # whether the entry has class suv or not
-mpg.suv <- mpg %>% 
+mpg_suv <- mpg %>% 
   mutate(issuv=ifelse(class=='suv', TRUE, FALSE))
 # Generate the plot with a manual color scale
-p <- ggplot(mpg.suv, aes(x=hwy, y=cty)) +
+p <- ggplot(mpg_suv, aes(x=hwy, y=cty)) +
   geom_point(aes(color=issuv)) +
   scale_color_manual( 
     limits=c(FALSE, TRUE), values=c('blue', 'red'),

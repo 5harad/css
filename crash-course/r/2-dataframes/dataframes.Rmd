@@ -764,11 +764,11 @@ gather(data, key, value, ...)
 
 ## Create *long* data with `gather()` (cont'd)
 ```{r, results='hide'}
-grades.tidy <- gather(grades, HW, score, HW1:HW3)
-grades.tidy
+grades_tidy <- gather(grades, HW, score, HW1:HW3)
+grades_tidy
 ```
 ```{r, echo=FALSE}
-head(grades.tidy)
+head(grades_tidy)
 ```
 
 ## Split a Column to Multiple Variables with `separate()`
@@ -780,15 +780,15 @@ variables, e.g., splitting a `date` column to `year`, `month`, and `day`
 
 ## Split a Column to with `separate()` (cont'd)
 ```{r, results='hide'}
-grades.split <- separate(
-  grades.tidy, info, 
+grades_split <- separate(
+  grades_tidy, info, 
   into = c('sex', 'house'), 
   sep = '/'
   )
-grades.split
+grades_split
 ```
 ```{r, echo=FALSE}
-head(grades.split, 3)
+head(grades_split, 3)
 ```
 
 ## Chaining `tidyr` verbs
@@ -797,7 +797,7 @@ operator `%>%`
 - For example, we can do the previous operations on the `grades` data with the
 chained operation
 ```{r}
-grades.final <- grades %>% 
+grades_final <- grades %>% 
   gather(HW, score, HW1:HW3) %>% 
   separate(info, into=c('sex', 'house'), sep='/')
 ```
@@ -838,10 +838,10 @@ head(finance, 8)
 
 ## Solution 2
 ```{r}
-finance.summary <- finance %>% 
+finance_summary <- finance %>% 
   group_by(ID, type) %>% 
   summarize(mean=mean(amount), total=sum(amount))
-finance.summary
+finance_summary
 ```
 
 # Combining Data with `join`s
