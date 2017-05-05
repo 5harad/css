@@ -391,6 +391,7 @@ buick$cylinders <- factor(buick$cylinders)
 plot(buick$cylinders)
 ```
 
+
 # Munging Data with `dplyr`
 
 ## Introduction to `dplyr`
