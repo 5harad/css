@@ -9,7 +9,7 @@ import sys
 def top_n(d, n=5):
     i = 1  # count to n
     for word in sorted(d, key=d.get, reverse=True):
-        print word, d[word]
+        print(word, d[word])
         if i == n:
             break
         i += 1
