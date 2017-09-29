@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 """Example mapper module for counting words via map-reduce.
 
-This file is saved as wc_mapper.py with execute permission 
+This file is saved as wc_mapper.py with execute permission
 (chmod +x wc_mapper.py)"""
 
 import sys
@@ -16,7 +16,8 @@ def main():
     for line in sys.stdin:
         words = line.strip().split()
         for word in words:
-            print word + '\t' + '1'
+            print(word + '\t' + '1')
+
 
 if __name__ == "__main__":
     main()
