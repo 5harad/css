@@ -1,4 +1,6 @@
-# save this function to a file named module1.py
+"""Example module1"""
+
+
 def speak():
     """Make module 1 say something"""
-    print 'Module 1 speaking ...'
+    print('Module 1 speaking ...')

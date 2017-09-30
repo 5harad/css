@@ -8,14 +8,15 @@ import sys
 
 def top_n(d, n=5):
     i = 1  # count to n
-    for word in sorted(d, key=d.get, reverse=True):
-        print word, d[word]
+    for w in sorted(d, key=d.get, reverse=True):
+        print(w, d[w])
         if i == n:
             break
         i += 1
 
+
 if __name__ == '__main__':
-    n = int(sys.argv[1])  # n as first argument
+    N = int(sys.argv[1])  # n as first argument
     words = {}
     for line in sys.stdin:
         for word in line.lower().split():
@@ -25,4 +26,4 @@ if __name__ == '__main__':
                 words[word] = 1
 
     # call the top_n function
-    top_n(words, n)
+    top_n(words, N)
