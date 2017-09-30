@@ -12,14 +12,14 @@ output:
 ---
 
 ## Dependencies
-- Latest version ($\ge$ `3.1.2`) of `R`  
+- Latest version of `R`  
   (*free* from <https://www.r-project.org/>)
 - Latest version of `Rstudio` 
   (also *free* from <https://www.rstudio.com/>)
 - A bunch of *free* packages
 ```{r, eval=FALSE}
 # for general plotting
-install.packages('tidyverse')  # ggplot2
+install.packages('tidyverse')  # ggplot2 
 install.packages('scales') 
 # spacial visualization on maps
 install.packages('ggmap')   
@@ -34,6 +34,8 @@ knitr::opts_chunk$set(cache=TRUE)
 library('tidyverse')
 library('scales')
 library('ggmap')
+
+theme_set(theme_bw())
 ```
 
 ## Visualization: Introduction
@@ -72,25 +74,26 @@ B <- c(3, 5)
 - Plot the coordinates of each vector `A` and `B` (no need to understand the 
 code)
 ```{r}
-plot(Time, A, type='l', col='red')
-lines(B, col='blue')
+plot(Time, A, type = 'l', col = 'red')
+lines(B, col = 'blue')
 ```
 
 ## Quick Comparison: The `ggplot2` Way
 - Create data frame from the vectors, and *tidy* into *long* format (Note that 
 the variables of interest are `time`,  `score`, and `group`)
-```{r}
-df <- tibble(time=Time, A=A, B=B )
-df_tidy <- gather(df, key=group, value=score, A:B)
+```{r, echo=FALSE}
+df <- tibble(time = Time, A = A, B = B)
+df_tidy <- gather(df, key = group, value = score, A:B) %>% 
+  arrange(time)
+print(df_tidy)
 ```
-- What does `df_tidy` look like?
 - Then, use `ggplot2` to *visualize* the data frame (this is what we'll cover 
 in this session, so you're not supposed to understand the following code)
 
 ## `ggplot2` Code and Plot
 ```{r, fig.height=2, fig.width=3}
-p <- ggplot(df_tidy, aes(x=time, y=score)) + 
-  geom_line(aes(color=group))
+p <- ggplot(df_tidy, aes(x = time, y = score)) +
+  geom_line(aes(color = group))
 p
 ```
 
@@ -124,17 +127,13 @@ is also loaded
 - You can also, but don't have to, install and load the `ggplot2` as a 
 standalone package like you  would any other `R` package
 ```{r, eval=FALSE}
-# Install, if you haven't already.
-# Only need to do this once on a single machine.
 install.packages('ggplot2')
-# load package into workspace
 library('ggplot2')
 ```
 
 ## Datasets
-- For this session, we'll mainly use the `quakes` and `economics` datasets that
-are included with your `R` installation and the `mpg` data set included 
-with `ggplot2`
+- For this session, we'll mainly use the `quakes` dataset included with your `R`
+installation and the `mpg` and `economics` datasets included with `ggplot2`
 - The `quakes` dataset contains the location (long/lat), depth (Km), Richter 
 Magnitude, and ID of reporting station for 1,000 seismic events near Fiji since 
 1964 
@@ -154,12 +153,12 @@ you can *add* various elements (e.g., data, visual markings, labels) as layers
 - First, you start by defining an empty `ggplot` object with the initializing 
 function `ggplot(data)`
 ```{r}
-p <- ggplot(data=quakes)
+p <- ggplot(data = quakes)
 ```
 - Note that
     - The `ggplot` object is assigned to a variable (in this case `p`). The 
     object exists in the workspace, and the *plot* is only generated when you 
-    *call* the object itself (i.e., if you type `p` in this case).
+    *print* the object itself (i.e., if you type `p` in the console).
     - An initial `ggplot` object is blank, equivalent to a brand new canvas.
 
 ## `aes`thetic Mappings
@@ -169,7 +168,7 @@ elements of the plot (e.g., $x$-axis coordinates, colors)
 - For example, from the `quakes` data set, if we want to have the `depth` on 
 the $x$-axis and `mag` on the $y$-axis, we could initialize our `ggplot` object as
 ```{r}
-p <- ggplot(quakes, aes(x=depth, y=mag))
+p <- ggplot(quakes, aes(x = depth, y = mag))
 ```
 - Note that
     - `aes()` itself is a function that returns a mapping object, which is used
@@ -185,7 +184,7 @@ p <- ggplot(quakes, aes(x=depth, y=mag))
 `ggplot` objects
 - For example
 ```{r}
-p <- ggplot(quakes, aes(x=depth, y=mag)) + 
+p <- ggplot(quakes, aes(x = depth, y = mag)) +
   geom_point()  # add 'point' geometry to p
 ```
 - We'll explore different `geom`etries and visual markings that can be 
@@ -194,11 +193,17 @@ p <- ggplot(quakes, aes(x=depth, y=mag)) +
 ## Saving Plots
 - You can save any plot from RStudio with Export > Save As ... or something 
 like that
-- That method of saving plots doesn't scale well, for obvious reasons
+- That method of saving plots doesn't scale well, for obvious reasons, **so
+don't do it!**
 - Use `ggsave()` to save plots to files
 ```{r, eval=FALSE}
-ggsave('my_plot.png', width=5, height=5, plot=p)
+ggsave('my_plot.png',
+       width = 5,
+       height = 5,
+       plot = p)
 ```
+
+## Saving Plots (cont'd)
 - `ggsave()` is smart enough to determine the filetype from the extension of the 
 filename that you specify (`png` in the above example)
 - While many formats are supported, `png` and `pdf` are most commonly used
@@ -213,7 +218,7 @@ filename that you specify (`png` in the above example)
 - Plot a simple histogram by specifying the $x$-axis variable, and adding the 
 histogram geometry with `geom_histogram()`
 ```{r, warning=FALSE, message=FALSE, fig.height=2}
-p <- ggplot(quakes, aes(x=stations)) +
+p <- ggplot(quakes, aes(x = stations)) +
   geom_histogram()
 p
 ```
@@ -222,8 +227,8 @@ p
 - Specify the size of each bin in the histogram with the `binwidth` argument 
 in `geom_histogram()`
 ```{r, warning=FALSE, message=FALSE, fig.height=2}
-p <- ggplot(quakes, aes(x=stations)) +
-  geom_histogram(binwidth=10)
+p <- ggplot(quakes, aes(x = stations)) +
+  geom_histogram(binwidth = 10)
 p
 ```
 
@@ -240,8 +245,8 @@ integrates to 1, set `aes(y=..density..)`
 
 ## Histogram with `aes(y=..density..)`
 ```{r, warning=FALSE, message=FALSE, fig.height=2}
-p <- ggplot(quakes, aes(x=stations)) + 
-  geom_histogram(binwidth=10, aes(y=..density..))
+p <- ggplot(quakes, aes(x = stations)) +
+  geom_histogram(binwidth = 10, aes(y = ..density..))
 p
 ```
 
@@ -258,15 +263,15 @@ distribution using binwidth 0.5
 
 ## Solution 1
 ```{r, fig.height=2}
-X <- tibble(x=rnorm(1000))
-p <- ggplot(data=X, aes(x=x)) +
-  geom_histogram(binwidth=0.5, aes(y=..density..))
+X <- tibble(x = rnorm(1000))
+p <- ggplot(data = X, aes(x = x)) + 
+  geom_histogram(binwidth = 0.5, aes(y = ..density..))
 p
 ```
 
 ## Solution 2
 ```{r, fig.height=2, fig.width=4}
-p <- ggplot(data=economics, aes(x=pop)) +
+p <- ggplot(data = economics, aes(x = pop)) +
   geom_density()
 p
 ```
@@ -277,7 +282,7 @@ p
 - Plot points on a 2D plane by specifying variables corresponding to the $x$ 
 and $y$-axis, and adding the point geometry with `geom_point()`
 ```{r, warning=FALSE, message=FALSE, fig.height=2, fig.width=3}
-p <- ggplot(quakes, aes(x=long, y=lat)) +
+p <- ggplot(quakes, aes(x = long, y = lat)) +
   geom_point()
 p
 ```
@@ -294,20 +299,24 @@ p
     
 ## Reference: Shapes
 ```{r, echo=FALSE, fig.height=3, fig.width=5, warning=FALSE}
-d=tibble(p=c(0:25,32:127))
+d <- tibble(p = c(0:25, 32:127))
 ggplot() +
-scale_y_continuous(name="", breaks=NULL) +
-scale_x_continuous(name="", breaks=NULL) +
-scale_shape_identity() +
-geom_point(data=d, mapping=aes(x=p%%16, y=p%/%16, shape=p), size=2, fill="red") +
-geom_text(data=d, mapping=aes(x=p%%16, y=p%/%16+0.25, label=p), size=1.5)
+  scale_y_continuous(name = "", breaks = NULL) +
+  scale_x_continuous(name = "", breaks = NULL) +
+  scale_shape_identity() +
+  geom_point(data = d, 
+             mapping = aes(x = p %% 16, y = p %/% 16, shape = p), 
+             size = 2, fill = "red") +
+  geom_text(data = d, 
+            mapping = aes(x = p %% 16, y = p %/% 16 + 0.25, label = p), 
+            size = 1.5)
 ```
 
 ## Lines with `geom_line()`
 - Similarly, plot lines on a 2D plane by specifying variables corresponding to 
 the $x$ and $y$-axis, and adding the line geometry with `geom_line()`
 ```{r, warning=FALSE, message=FALSE, fig.height=2, fig.width=5}
-p <- ggplot(economics, aes(x=date, y=unemploy)) +
+p <- ggplot(economics, aes(x = date, y = unemploy)) +
   geom_line()
 p
 ```
@@ -321,13 +330,14 @@ p
     
 ## Reference: Linetypes
 ```{r, echo=FALSE, fig.height=3, fig.width=5, warning=FALSE}
-d=tibble(lt=c("blank", "solid", "dashed", "dotted", "dotdash", "longdash", 
-              "twodash", "1F", "F1", "4C88C488", "12345678"))
+d <- tibble(lt = c("blank", "solid", "dashed", "dotted", "dotdash", "longdash", 
+                   "twodash", "1F", "F1", "4C88C488", "12345678"))
 ggplot() +
-scale_x_continuous(name="", limits=c(0,1), breaks=NULL) +
-scale_y_discrete(name="linetype") +
-scale_linetype_identity() +
-geom_segment(data=d, mapping=aes(x=0, xend=1, y=lt, yend=lt, linetype=lt))
+  scale_x_continuous(name = "", limits = c(0, 1), breaks = NULL) +
+  scale_y_discrete(name = "linetype") + 
+  scale_linetype_identity() +
+  geom_segment(data = d, 
+               mapping = aes(x = 0, xend = 1, y = lt, yend = lt, linetype = lt))
 ```
 
 ## A Note on `data` and `aes()` Arguments
@@ -338,12 +348,12 @@ function, or locally in each `geom`etry function
     - mapped to a variable *locally*, i.e., in `geom_*(aes())`, or
     - defined explicitly for a local `geom_*()`, outside of `aes()`
 - It's critical to understand the difference between 'mapping' an aesthetic and 
-'explicitly defining' one
+'explicitly defining' one as an argument
 
 ## Example: Global `aes()` mapping
 ```{r, eval=FALSE}
-p <- ggplot(quakes, aes(x=long, y=lat, size=mag)) +
-  geom_point(alpha=.3)
+p <- ggplot(quakes, aes(x = long, y = lat, size = mag)) +
+  geom_point(alpha = .3)
 p
 ```
 - the `data` and `aes`thetic mappings for `x`, `y`, and `size` are defined 
@@ -356,16 +366,16 @@ own `geom_*()` function
 
 ## Example: Global `aes()` mapping (figure)
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=3, fig.width=5}
-p <- ggplot(quakes, aes(x=long, y=lat, size=mag)) +
-  geom_point(alpha=.3)
+p <- ggplot(quakes, aes(x = long, y = lat, size = mag)) +
+  geom_point(alpha = .3)
 p
 ```
 
 ## Example: Local `aes()` mapping
 ```{r, eval=FALSE}
-p <- ggplot(quakes, aes(x=long, y=lat)) +
-  geom_point(alpha=.3, aes(size=mag)) +
-  geom_point(size=1, aes(color=stations))
+p <- ggplot(quakes, aes(x = long, y = lat)) +
+  geom_point(alpha = .3, aes(size = mag)) +
+  geom_point(size = 1, aes(color = stations))
 p
 ```
 - Here, the `data` and `aes`thetic mappings for `x` and `y` are defined 
@@ -380,9 +390,9 @@ maps the `color` `aes`thetic to the `stations` variable
 
 ## Example: Local `aes()` mapping (figure)
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=3.5, fig.width=5}
-p <- ggplot(quakes, aes(x=long, y=lat)) +
-  geom_point(alpha=.3, aes(size=mag)) +
-  geom_point(size=1, aes(color=stations))
+p <- ggplot(quakes, aes(x = long, y = lat)) +
+  geom_point(alpha = .3, aes(size = mag)) +
+  geom_point(size = 1, aes(color = stations))
 p
 ```
 
@@ -397,41 +407,41 @@ the largest magnitude
 (hint: you'll need to crate another data frame consisting of the single
 observation you wish to plot)
 
-3. Using the `economics` dataset, plot lines for the values of `unemploy` and 
-`pop` with different linetypes, against `date` as the horizontal axis. 
-(hint: you'll need to select the variables you need, and tidy the data into 
-long format)
+3. [OPTIONAL, requires `tidyr`] Using the `economics` dataset, plot lines for
+the values of `unemploy` and `pop` with different linetypes, against `date` as
+the horizontal axis. (hint: you'll need to select the variables you need, and
+tidy the data into long format)
 
 ## Goal: Exercise 1
 ```{r, echo=FALSE, fig.width=5, fig.height=3.5}
-p <- ggplot(mpg, aes(x=hwy, y=cty)) +
-  geom_point(alpha=.3, aes(color=class, size=cyl))
+p <- ggplot(mpg, aes(x = hwy, y = cty)) +
+  geom_point(alpha = .3, aes(color = class, size = cyl))
 p
 ```
 
 ## Goal: Exercise 2
 ```{r, echo=FALSE, fig.width=5, fig.height=3.5}
-quakes_max_mag <- quakes %>% 
+quakes_max_mag <- quakes %>%
   arrange(desc(mag)) %>%
   slice(1)
-
-p <- ggplot(quakes, aes(x=long, y=lat)) +
-  geom_point(alpha=.3, aes(size=mag)) +
-  geom_point(data=quakes_max_mag, 
-             size=5,
-             color='red',
-             shape=8)
+  
+p <- ggplot(quakes, aes(x = long, y = lat)) +
+  geom_point(alpha = .3, aes(size = mag)) +
+  geom_point(data = quakes_max_mag, 
+             size = 5,
+             color = 'red',
+             shape = 8)
 p
 ```
 
 ## Goal: Exercise 3
 ```{r, echo=FALSE, fig.width=5, fig.height=3.5}
-econ_tidy <- economics %>% 
-  select(date, unemploy, pop) %>% 
+econ_tidy <- economics %>%
+  select(date, unemploy, pop) %>%
   gather(var, value, unemploy:pop)
-
-p <- ggplot(econ_tidy, aes(x=date, y=value)) +
-  geom_line(aes(linetype=var))
+  
+p <- ggplot(econ_tidy, aes(x = date, y = value)) +
+  geom_line(aes(linetype = var))
 p
 ```
 
@@ -442,16 +452,16 @@ p
 
 ## Solution 1
 ```{r, eval=FALSE}
-p <- ggplot(mpg, aes(x=hwy, y=cty)) +
-  geom_point(alpha=.3, 
-             aes(color=class, size=cyl))
+p <- ggplot(mpg, aes(x = hwy, y = cty)) +
+  geom_point(alpha = .3,  
+             aes(color = class, size = cyl))
 p
 ```
 
 ## Solution 1 (figure)
 ```{r, echo=FALSE, fig.width=5, fig.height=3.5}
-p <- ggplot(mpg, aes(x=hwy, y=cty)) +
-  geom_point(alpha=.3, aes(color=class, size=cyl))
+p <- ggplot(mpg, aes(x = hwy, y = cty)) +
+  geom_point(alpha = .3, aes(color = class, size = cyl))
 p
 ```
 
@@ -460,16 +470,16 @@ p
 ```{r, eval=FALSE}
 # Find the largest magnitude observation
 quakes_max_mag <- quakes %>% 
-  arrange(desc(mag)) %>%
+  arrange(desc(mag)) %>% 
   slice(1)
 
 # Generate plot
-p <- ggplot(quakes, aes(x=long, y=lat)) +
-  geom_point(alpha=.3, aes(size=mag)) +
-  geom_point(data=quakes_max_mag, 
-             size=5,
-             color='red',
-             shape=8)
+p <- ggplot(quakes, aes(x = long, y = lat)) +
+  geom_point(alpha = .3, aes(size = mag)) +
+  geom_point(data = quakes_max_mag, 
+             size = 5, 
+             color = 'red', 
+             shape = 8)
 p
 ```
 
@@ -491,14 +501,14 @@ p
 
 ## Solution 3
 ```{r, eval=FALSE}
-# first, get the data into the right format
+# First, get the data into the right format
 econ_tidy <- economics %>% 
   select(date, unemploy, pop) %>% 
   gather(var, value, unemploy:pop)
 
-# generate the plot
-p <- ggplot(econ_tidy, aes(x=date, y=value)) +
-  geom_line(aes(linetype=var)) 
+# Generate the plot
+p <- ggplot(econ_tidy, aes(x = date, y = value)) +
+  geom_line(aes(linetype = var))
 p
 ```
 
@@ -532,22 +542,22 @@ labels from data
 
 ## Labels (Example)
 ```{r, fig.height=2.5, fig.width=5}
-p <- ggplot(economics, aes(x=date, y=unemploy)) +
+p <- ggplot(economics, aes(x = date, y = unemploy)) +
   geom_line() +
-  labs(title='Unemployment by time', 
-       x='Date (by month)',
-       y='Unemployment')
+  labs(title = 'Unemployment by time', 
+       x = 'Date (by month)', 
+       y = 'Unemployment')
 p
 ```
 
 ## Labels: Pro tip!
 
 ```{r, fig.height=2.5, fig.width=5}
-p <- ggplot(economics, aes(x=date, y=unemploy)) +
+p <- ggplot(economics, aes(x = date, y = unemploy)) +
   geom_line() +
-  labs(title='Unemployment by time', 
-       x='\nDate (by month)',
-       y='Unemployment\n')
+  labs(title = 'Unemployment by time', 
+       x = '\nDate (by month)', 
+       y = 'Unemployment\n')
 p
 ```
 
@@ -567,15 +577,15 @@ library('scales')
 - The general syntax for setting scales is
 ```{r, eval=FALSE}
 scales_{aes name}_{some option}(
-    # range of data values to map
-    limits = ... 
-    # vector of aes values to map 
-    values = ...  
-    # breaks to use in legend/axis
-    breaks = ...
     # name of legend/axis
     name = ...
-    # labels to use in legend/axis
+    # range of data values to map
+    limits = ... 
+    # what aesthetic values to use for the limits
+    values = ...  
+    # where to mark legend/axis
+    breaks = ...
+    # what to label the marks (breaks)
     labels = ...
 )
 ```
@@ -596,12 +606,10 @@ given for $x$, but can be used for $y$ by substituting $x$ for $y$)
 - To plot `unemploy` against `date`, but mark the $x$ axis for every 15 years, 
 we would write
 ```{r, eval=FALSE}
-p <- ggplot(economics, aes(x=date, y=unemploy)) +
+p <- ggplot(economics, aes(x = date, y = unemploy)) +
   geom_line() +
-  scale_x_date(
-    labels=date_format('%Y'),  
-    breaks=date_breaks("15 years")
-    )
+  scale_x_date(labels = date_format('%Y'), 
+               breaks = date_breaks("15 years"))
 p
 ```
 
@@ -629,15 +637,15 @@ red points for `class=suv` and blue points otherwise
 ```{r, eval=FALSE}
 # First, create a new column in the data indicating 
 # whether the entry has class suv or not
-mpg_suv <- mpg %>% 
-  mutate(issuv=ifelse(class=='suv', TRUE, FALSE))
+mpg_suv <- mpg %>%
+  mutate(issuv = class == 'suv')
 # Generate the plot with a manual color scale
-p <- ggplot(mpg_suv, aes(x=hwy, y=cty)) +
-  geom_point(aes(color=issuv)) +
-  scale_color_manual( 
-    limits=c(FALSE, TRUE), values=c('blue', 'red'),
-    breaks=c(TRUE, FALSE), labels=c('SUV', 'Other') 
-    )
+p <- ggplot(mpg_suv, aes(x = hwy, y = cty)) +
+  geom_point(aes(color = issuv)) +
+  scale_color_manual(limits = c(FALSE, TRUE), 
+                     values = c('blue', 'red'),   
+                     breaks = c(TRUE, FALSE),
+                     labels = c('SUV', 'Other'))
 p
 ```
 
@@ -675,37 +683,38 @@ p <- p + theme(legend.position=c(0,1),
 
 ## Legends: Position Top Example
 ```{r, eval=FALSE}
-p <- ggplot(mpg_suv, aes(x=hwy, y=cty)) +
-  geom_point(aes(color=issuv)) +
-  scale_color_manual( 
-    limits=c(FALSE, TRUE), values=c('blue', 'red'),
-    breaks=c(TRUE, FALSE), labels=c('SUV', 'Other') 
-    ) +
-  theme(legend.position='top')
+p <- ggplot(mpg_suv, aes(x = hwy, y = cty)) +
+  geom_point(aes(color = issuv)) +
+  scale_color_manual(limits = c(FALSE, TRUE), 
+                     values = c('blue', 'red'), 
+                     breaks = c(TRUE, FALSE), 
+                     labels = c('SUV', 'Other')) +
+  theme(legend.position = 'top')
 p
 ```
 
 ## Legends: Position Top Example (figure)
 ```{r, echo=FALSE, fig.height=5, fig.width=6}
-p <- ggplot(mpg_suv, aes(x=hwy, y=cty)) +
-  geom_point(aes(color=issuv)) +
-  scale_color_manual( 
-    limits=c(FALSE, TRUE), values=c('blue', 'red'),
-    breaks=c(TRUE, FALSE), labels=c('SUV', 'Other') 
-    ) +
-  theme(legend.position='top')
+p <- ggplot(mpg_suv, aes(x = hwy, y = cty)) +
+  geom_point(aes(color = issuv)) +
+  scale_color_manual(limits = c(FALSE, TRUE), 
+                     values = c('blue', 'red'), 
+                     breaks = c(TRUE, FALSE), 
+                     labels = c('SUV', 'Other')) +
+  theme(legend.position = 'top')
+
 p
 ```
 
 ## Legends: Position Example
 ```{r, eval=FALSE}
-p <- ggplot(mpg_suv, aes(x=hwy, y=cty)) +
-  geom_point(aes(color=issuv)) +
-  scale_color_manual( 
-    limits=c(FALSE, TRUE), values=c('blue', 'red'),
-    breaks=c(TRUE, FALSE), labels=c('SUV', 'Other') 
-    ) +
-  theme(legend.position=c(1, 0))
+p <- ggplot(mpg_suv, aes(x = hwy, y = cty)) +
+  geom_point(aes(color = issuv)) +
+  scale_color_manual(limits = c(FALSE, TRUE), 
+                     values = c('blue', 'red'), 
+                     breaks = c(TRUE, FALSE), 
+                     labels = c('SUV', 'Other')) +
+  theme(legend.position = c(1, 0))
 p
 ```
 
@@ -723,13 +732,14 @@ p
 
 ## Legends: Position Example
 ```{r, eval=FALSE}
-p <- ggplot(mpg_suv, aes(x=hwy, y=cty)) +
-  geom_point(aes(color=issuv)) +
-  scale_color_manual( 
-    limits=c(FALSE, TRUE), values=c('blue', 'red'),
-    breaks=c(TRUE, FALSE), labels=c('SUV', 'Other') 
-    ) +
-  theme(legend.position=c(1, 0), legend.justification = c(1, 0))
+p <- ggplot(mpg_suv, aes(x = hwy, y = cty)) +
+  geom_point(aes(color = issuv)) +
+  scale_color_manual(limits = c(FALSE, TRUE), 
+                     values = c('blue', 'red'), 
+                     breaks = c(TRUE, FALSE), 
+                     labels = c('SUV', 'Other')) +
+  theme(legend.position = c(1, 0), 
+        legend.justification = c(1, 0))
 p
 ```
 
@@ -750,33 +760,34 @@ p
 - A common use-case is, for example, to hide legends by setting the `aes`thetic 
 to `none` in `guides()`, e.g., 
 ```{r, eval=FALSE}
-# hide color legends
-p <- p + guides(color='none')
+# Hide color legends
+p <- p + guides(color = 'none')
 ```
 
 ## Legends: Scales
 - As shown in the scales section, we can specify the title/breaks/labels for a 
 legend, using the `scale_*_` of the  corresponding `aes`thetic, e.g.,
 ```{r, eval=FALSE}
-# to modify legend title/labels for a
-#   continuous variable applied to color aes()
-p <- p + scale_color_continuous( 
-  name='legend title', 
-  breaks=c(1, 5),  # vector of points to label 
-  labels=c('low', 'high') # corresponding labels 
+# To modify legend title/labels for a
+# continuous variable applied to color aes()
+p <- p + scale_color_continuous(
+  name = 'legend title',
+  breaks = c(1, 5),  # vector of points to label
+  labels = c('low', 'high')  # corresponding labels
   )
 ```
 
 ## Legends (Example)
 ```{r, eval=FALSE}
-p <- ggplot(quakes, aes(x=long, y=lat)) +
-  geom_point(alpha=.6, aes(size=mag, color=depth)) +
-  theme(legend.position=c(0,0), 
-        legend.justification=c(0,0)) +
-  scale_size_continuous(
-    name='Magnitude', breaks=c(4, 6), 
-    labels=c('small', 'big')) +
-  guides(color='none')
+p <- ggplot(quakes, aes(x = long, y = lat)) +
+  geom_point(alpha = .6,
+             aes(size = mag, color = depth)) +
+  scale_size_continuous(name = 'Magnitude', 
+                        breaks = c(4, 6), 
+                        labels = c('small', 'big')) +
+  theme(legend.position = c(0, 0), 
+        legend.justification = c(0, 0)) +
+  guides(color = 'none')
 p
 ```
 
@@ -794,19 +805,20 @@ p
 
 ## Legends: Remarks
 - *Lots* of legend options (and more!) can be controlled via `theme()`
-- Get familiar with the options in `?theme` to become a real pro!
+- Get familiar with the options in `?theme` 
 
 ## Facets
-- Facets let you divide a plot into subplots based on the values of a (discrete) variable
+- Facets let you divide a plot into subplots based on the values of a (discrete)
+variable
 - The notation is
 ```{r, eval=FALSE}
-# divide into subplots of 2D grid
+# Divide into subplots of 2D grid
 # using upto two variables
 facet_grid( var.row ~ var.col)
 
-# wrap into a rectangular layout
+# Wrap into a rectangular layout
 # using a single variable
-facet_wrap(~ var, nrow=NULL, ncol=NULL)
+facet_wrap( ~ var, nrow = NULL, ncol = NULL)
 ```
 
 - `var.row` is the name of the variable to use to divide the rows
@@ -817,7 +829,7 @@ facet_wrap(~ var, nrow=NULL, ncol=NULL)
 ## Facets: Examples
 - `facet_grid()` with one variable (columns)
 ```{r, eval=FALSE}
-p <- ggplot(mpg, aes(x=hwy, y=cty)) +
+p <- ggplot(mpg, aes(x = hwy, y = cty)) +
   geom_point() +
   facet_grid(. ~ cyl)
 p
@@ -834,7 +846,7 @@ p
 ## Facets: Examples
 - `facet_grid()` with one variable (rows)
 ```{r, eval=FALSE}
-p <- ggplot(mpg, aes(x=hwy, y=cty)) +
+p <- ggplot(mpg, aes(x = hwy, y = cty)) +
   geom_point() +
   facet_grid(year ~ .)
 p
@@ -851,7 +863,7 @@ p
 ## Facets: Examples
 - `facet_grid()` with two variables
 ```{r, eval=FALSE}
-p <- ggplot(mpg, aes(x=hwy, y=cty)) +
+p <- ggplot(mpg, aes(x = hwy, y = cty)) +
   geom_point() +
   facet_grid(year ~ cyl)
 p
@@ -868,17 +880,17 @@ p
 ## Facets: Examples
 - `facet_wrap()`
 ```{r, eval=FALSE}
-p <- ggplot(mpg, aes(x=hwy, y=cty)) +
+p <- ggplot(mpg, aes(x = hwy, y = cty)) +
   geom_point() +
-  facet_wrap( ~ fl)
+  facet_wrap(~ fl)
 p
 ```
 
 ## Facets: Examples (figure)
 ```{r, echo=FALSE, fig.height=5, fig.width=7}
-p <- ggplot(mpg, aes(x=hwy, y=cty)) +
+p <- ggplot(mpg, aes(x = hwy, y = cty)) +
   geom_point() +
-  facet_wrap( ~ fl)
+  facet_wrap(~ fl)
 p
 ```
 
@@ -925,8 +937,8 @@ to other sources
 ## A Map Layer Example: Location Search
 ```{r, fig.height=2, message=FALSE, warning=FALSE}
 # Map of stanford by search
-p <- qmap(location='Stanford, CA', 
-          zoom=15, maptype='satellite')
+p <- qmap(location = 'Stanford, CA',
+          zoom = 15, maptype = 'satellite')
 p
 ```
 
@@ -934,9 +946,9 @@ p
 ```{r, fig.height=2, message=FALSE, warning=FALSE}
 # Bounding box around North America 
 # (I Googled the numbers)
-p <- qmap(location=c(left=-52.233, 
-          bottom=5.4996, right=-167.2764, 
-          top=83.1621), zoom=3)
+box <- c(left = -52.233, bottom = 5.4996,   
+         right = -167.2764, top = 83.1621)
+p <- qmap(zoom = 3, location = box)
 p
 ```
  
@@ -953,21 +965,21 @@ variables to define the bounding box)
 
 ## Solution
 ```{r, eval=FALSE}
-maxmag <- filter(quakes, mag==max(quakes$mag))
-p <- qmap(location=c(left=min(quakes$long), 
-                     bottom=min(quakes$lat),
-                     right=max(quakes$long),
-                     top=max(quakes$lat)),
-          zoom=4, color='bw', legend='topleft') +
-  geom_point(data=quakes, alpha=0.6, 
-             aes(x=long, y=lat, size=mag, 
-                 color=depth))
+box <- c(left = min(quakes$long),  
+         bottom = min(quakes$lat),  
+         right = max(quakes$long),  
+         top = max(quakes$lat)
+         
+p <- qmap(location = box, zoom = 4, 
+          color = 'bw', legend = 'topleft') +
+  geom_point(data = quakes, alpha = 0.6, 
+             aes(x = long, y = lat, 
+                 size = mag, color = depth))
 p
 ```
 
 ## Solution (figure)
 ```{r, echo=FALSE, fig.height=5, fig.width=5, warning=FALSE, message=FALSE}
-maxmag <- filter(quakes, mag==max(quakes$mag))
 p <- qmap(location=c(left=min(quakes$long), 
                      bottom=min(quakes$lat),
                      right=max(quakes$long),
@@ -981,3 +993,4 @@ p
 - A great "cheat sheet" for data visualization with `ggplot2` is available
 for free at 
 https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf
+- Or Help > Cheatsheets > Data visualization ... in Rstudio

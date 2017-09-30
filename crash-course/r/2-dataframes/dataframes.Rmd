@@ -8,11 +8,10 @@ output:
     fonttheme: professionalfonts
     highlight: zenburn
     theme: boxes
-    toc: yes
 ---
 
 ## Dependencies
-- Latest version ($\ge$ `3.1.2`) of `R`
+- Latest version of `R`
   (*free* from <https://www.r-project.org/>)
 - Latest version of `Rstudio`
   (also *free* from <https://www.rstudio.com/>)
@@ -24,7 +23,6 @@ output:
 install.packages('tidyverse')
 # install.packages('dplyr')
 # install.packages('tidyr')
-install.packages('nycflights13')  # sample data frame
 ```
 ```{r, echo=FALSE, results='hide', message=FALSE}
 options(width=50)
@@ -46,37 +44,25 @@ each column is a vector that belongs to the (parent) data frame
 data frames
 
 ## Data Frames: First Impression
-- Let's load an existing data frame to take a look at
+- Let's take a look at an existing dataset, `txhousing` (loaded with `ggplot2` 
+--- which is loaded with `tidyverse`)
+- Contains data (9 variables) on 8,602 observations about the housing market in 
+Texas, from 2000 to 2015
+- See documentation for details on what the 9 variables are
 ```{r, eval=FALSE}
-# install data package (only need to do once)
-install.packages('nycflights13')
-```
-
-```{r}
-# load data package to workspace
-library('nycflights13')
-```
-- The `nycflights13` package contains a single data frame named `flights`
-- Contains data (16 variables) on all 336,776 flights that departed NYC
-(i.e. JFK, LGA, or EWR) in 2013
-- See documentation for details on what the 16 variables are
-```{r, eval=FALSE}
-?flights
+?txhousing
 ```
 
 ## Data Frames: First Impression (cont'd)
-```{r, echo=FALSE}
-flights <- as_tibble(flights)
-```
 ```{r}
-str(flights)  # take a peek at the data frame
+str(txhousing)  # take a peek at the data frame
 ```
 
 ## Some Question
 - What questions could you ask (and answer) with this data?
-    - how many flights were there each day?
-    - what was the mean departure delay for flights every month/day?
-    - what is the proportion of annual departures from each of the three airports?
+    - which cities had the highest/lowest volume in sales?
+    - what was the annual/monthly sales per city?
+    - are there monthly trends across multiple years in listings?
     - what else?
 
 - By the end of this session, we'll have the tools to answer most (if not all)
@@ -179,7 +165,7 @@ data[3:5, 'personality']
 (either numeric or string)
 ```{r}
 data[1:3, c('age', 'income')]
-data[c(1,4), 2:3]
+data[c(1, 4), 2:3]
 ```
 
 ## Conditional Indexing
@@ -202,7 +188,7 @@ data[ind, ]  # index rows by binary vector ind
 # third observation (row 3)
 data[3, 1]  # if you know that 'age' is column 1
 data[3, 'age']
-data[3,]$age  # get 'age' of row 3
+data[3, ]$age  # get 'age' of row 3
 data$age[3]  # get third observation of 'age' variable
 ```
 
@@ -225,7 +211,7 @@ write_tsv(x, path = "")
 - For example, to save our sample data to a file named `data.tsv` with the
 entries of each row separated by a tab character, write
 ```{r, eval=FALSE}
-write_tsv(data, path='data.tsv')
+write_tsv(data, path = 'data.tsv')
 ```
 - Recall, the default directory is the current working directory, specified with
 `setwd()`, and retrieved with `getwd()`
@@ -294,87 +280,43 @@ the local copy in another (e.g., tab-separated)
 
 # Exploring Data Frames
 
-## Example Data
-- We'll use a sample dataset from `https://goo.gl/epWdDj`
-- First, load the data into your workspace
-```{r, cache=TRUE}
-address <- 'https://goo.gl/MaHL7q'
-autompg <- read_tsv(address)
-```
-- The data contains fuel consumption data of 398 vehicles
-- Originally from the [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml/)
-- See documentation [here](http://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.names)
-    - http://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.names
-
 ## Display Structure with `str()`
+- Let's start look at the `txhousing` data frame
 - The `str()` function is useful for exploring the overall structure of a
 data frame
 ```{r, eval=FALSE}
-str(autompg)
+str(txhousing)
 ```
 ```{r, echo=FALSE}
-str(autompg, strict.width='cut')
+str(txhousing, strict.width='cut')
 ```
 
 ## `Factor`s
-- Note that some variables should be `factor`s -- a data frame representation of
-categorical variables
+- Note that the city column should be a `factor` -- a data frame representation
+of categorical variables
 
 - Use `factor()` to force varaible into factor variables
 ```{r}
-autompg$year <- factor(autompg$year)
-autompg$model <- factor(autompg$model)
-autompg$make <- factor(autompg$make)
+txhousing$city <- factor(txhousing$city)
 ```
 - The entries of a `factor` variable is defined by `levels`
 ```{r, eval=FALSE}
-levels(autompg$make)
+levels(txhousing$city)
 ```
 
 ## `unique` values
 - Use `unique()` to list the unique values of any variable
 ```{r}
-unique(autompg$cylinders)
+unique(txhousing$year)
 ```
-
-## Basic `plot`s
-- Use `plot()` to generate quick and dirty (but sometimes helpful) plots
-- By default, `plot()` will generate histograms of categorical variables
-(`factor`s) and scatter plots (with respect to row index) of continuous
-variables
-```{r, fig.width=3, fig.height=3, fig.align='center'}
-plot(autompg$year)
-```
-
-## Basic `plot`s (cont'd)
-```{r, fig.align='center'}
-plot(autompg$mpg)
-```
-
-## Basic `plot`s (cont'd)
-- Use syntax `plot(x, y)` to plot two variables
-```{r, fig.align='center'}
-plot(autompg$weight, autompg$mpg)
-```
-
-## Plotting `pairs`
-- To plot more than two variables against each other, use `pairs()`
-```{r, fig.width=2.5, fig.height=2.5, fig.align='center'}
-pairs(autompg[, c('mpg', 'weight', 'year')])
-```
-
-- Note that you can plot the entire data frame with ```pairs(autompg)```
 
 ## Data Frame Basics: Exercise
-- From the `autompg` data
-    - create a new data frame with all the buick vehicles (i.e., `make=="buick"`)
-    - generate a `summary()` of the buick vehicles' `mpg`
-    - make the `cylinders` variable of the buick data frame into a factor
-    - plot a histogram of the buick's `cylinders`
+- From the `txhousing` data
+    - create a new data frame for the city "Paris" (i.e., `city == "Paris"`)
+    - generate a `summary()` of the inventory in Paris
 - These are just (very) basic operations
 - For more complicated operations, we'll use `dlyr` and `tidyr` (both part of
 `tidyverse` and covered next)
-- For more sophisticated plots, we'll use `ggplot2` (covered in the next session)
 
 # Exercise Solution
 
@@ -384,50 +326,47 @@ pairs(autompg[, c('mpg', 'weight', 'year')])
 
 ## Solution
 ```{r, fig.align='center', fig.width=2.5, fig.height=2.5}
-buick_index <- autompg$make == 'buick'
-buick <- autompg[buick_index, ]
-summary(buick$mpg)
-buick$cylinders <- factor(buick$cylinders)
-plot(buick$cylinders)
+ind_paris <- txhousing$city == "Paris"
+paris <- txhousing[ind_paris, ]
+summary(paris$inventory)
 ```
 
 
-# Munging Data with `dplyr`
+# Wrangling Data with `dplyr`
 
 ## Introduction to `dplyr`
 - `dplyr` is a package that provides a convenient framework (along with a
 handful of useful functions) for wrangling data (frames)
 - `dplyr` is a part of the `tidyverse`, so if you load `tidyverse`, `dplyr` is
 also loaded
-- You can also, but don't have to, install and load the `dplyr` as a standalone
+- You can also, but don"t have to, install and load the `dplyr` as a standalone
 package like you  would any other `R` package
 ```{r, eval=FALSE}
-# Install, if you haven't already.
 # Only need to do this once on a single machine.
-install.packages('dplyr')
+install.packages("dplyr")
 # load package into workspace
-library('dplyr')
+library("dplyr")
 ```
-- We'll primarily use the `flights` data frame from the `nycflights13` package
-in this part
 
-
-## Work with `tibble`
-- To be consistent, and avoid surprises, make sure you're working with a 
-`tibble` and **NOT** a `data.frame`. 
-- Since `tibble`s are just an opinionated `data.frame`, you can make sure you're
-working with a `tibble` by converting your `data.frame`s to `tibble`s with 
-`as_tibble()`
-```{r}
-flights <- as_tibble(flights)
+## Data Frames: First Impression
+- We'll primarily use the `diamonds` data that's included with `tidyverse`
+- Take a look by typing `diamonds` in the `R` console
+- `diamonds` is a dataset containing the prices and other attributes of almost 
+54,000 diamonds. Included variables are:
+    - price, carat, cut, color, clarity, dimensions (x, y, z, depth, table)
+    
+- See documentation for more details 
+```{r, eval=FALSE}
+?diamonds
 ```
 
 ## Verbs
-- A *verb* in the world of `dplyr` is a function that takes a data frame as its
-first argument, and returns another data frame as a result
+- A *verb* in the world of `dplyr` is a function that 
+    - takes a data frame as its first argument, and 
+    - returns another data frame as a result
 - For example, the `head()` function can be considered a verb
 ```{r, eval=FALSE}
-head(flights, n = 10)
+head(diamonds, n = 3)
 ```
 - Note that the result of the `head()` function is another data frame
 (in this case, with 3 rows)
@@ -437,16 +376,17 @@ be satisfied with 5 basic verbs (or 4, depending on how you categorize them)
 ## Five basic verbs
 - The five basic verbs of `dplyr` and associated actions are presented below
 
-verb | action
----- | ------
-`filter()` | select a subset of *rows* by specified conditions
-`select()` | select a subset of *columns*
-`mutate()` | create a *new column* (often from existing columns)
-`arrange()` | reorder (sort) *rows* by values of specified *column*(s)
+verb          | action
+----          | ------
+`filter()`    | select a subset of *rows* by specified conditions
+`select()`    | select a subset of *columns*
+`mutate()`    | create a *new column* (often from existing columns)
+`arrange()`   | reorder (sort) *rows* by values of specified *column*(s)
 `summarize()` | aggregate values and reduce to single value
 
 - Some verbs have additional options or convenient wrappers
 
+# Selecting rows (1/5)
 ## Selecting Rows: `filter()`
 - Select a subset of *rows*
 - Multiple conditions can be used
@@ -455,36 +395,40 @@ verb | action
 - `AND(&)`/`OR(|)` operations can be used together
 (where default behavior for multiple conditions is `AND`)
 ```{r, eval=FALSE}
-filter(flights, tailnum == 'N14228' & arr_delay > 10)
-filter(flights,
-       tailnum == 'N14228' |  tailnum == 'N24211')
-filter(flights,
-       tailnum == 'N14228' |  tailnum == 'N24211',
-       arr_delay > 10)
+filter(diamonds, cut == "Ideal" & carat > 3)
+filter(diamonds, carat <= .2 |  carat >= 3)
+filter(diamonds,
+       carat <= .2 |  carat >= 3, color == "D")
 ```
+- Use `%in%` to match on a collection of values
+```{r, eval=FALSE}
+filter(diamonds, cut %in% c("Fair", "Ideal"))
+```
+
 
 ## Selecting Rows: `slice()`
 - To select rows by numerical index (position), use `slice()`
 - For example, to select the first 10 rows
 ```{r, eval=FALSE}
-slice(flights, 1:10)
+slice(diamonds, 1:10)
 ```
 - or to select the last 10 rows
 ```{r, eval=FALSE}
-slice(flights, (n() - 9):n())
+slice(diamonds, (n() - 9):n())
 ```
 - Use `n()` inside a `dplyr` verb to to indicate the *number of rows* of the
 data frame
 
+# Selecting columns (2/5)
 ## Selecting Columns: `select()`
 - Select a subset of *columns*
 - Either specify the columns that you want to select
 ```{r, eval=FALSE}
-select(flights, carrier, tailnum)
+select(diamonds, cut, price)
 ```
 - Or specify the columns you wish to drop
 ```{r, eval=FALSE}
-select(flights, -year, -month, -day)
+select(diamonds, -x, -y, -z)
 ```
 
 ## Selecting Columns: `select()` (cont'd)
@@ -501,156 +445,185 @@ that match specific criteria such as
 - While you can assign new column names with `select()` the convenience function
 `rename()` lets you rename columns while retaining the rest of the data frame
 ```{r, eval=FALSE}
-select(flights, tail_num = tailnum)
-rename(flights, tail_num = tailnum)
+rename(diamonds, cut_type = cut)
 ```
 
+# Creating new columns (3/5)
 ## Create New Columns: `mutate()`
 - Create new columns, usually as a function of existing columns
 - You can refer to new columns you just created, inside the same `mutate()`
 function
 ```{r, eval=FALSE}
-mutate(flights, gain = arr_delay - dep_delay,
-       speed = distance / air_time * 60,
-       # use the gain column we just created
-       # to create yet another gain_per_hour column
-       gain_per_hour = gain / (air_time / 60)
+mutate(diamonds, 
+       price_per_carat = price / carat,
+       volume = x * y * z,
+       # Use the volume column we just created
+       # to create yet another price_per_volume column
+       price_per_volume = price / volume
        )
 ```
 - Use `transmute()` to create a new data frame *just from* the new column(s)
 ```{r, eval=FALSE}
-transmute(flights, gain = arr_delay - dep_delay)
+transmute(diamonds, carat, 
+          price_per_carat = price / carat)
 ```
 
+# Sorting (4/5)
 ## Sorting Rows by Column Value: `arrange()`
-- Reorder the rows of a data frame by the specified column's value
+- Reorder the rows of a data frame by the specified column"s value
 - Multiple conditions are arranged from left to right
 - Use `desc()` to arrange in descending order
 ```{r, eval=FALSE}
-arrange(flights, year, month, day)
-arrange(flights, year, desc(month), day)
-arrange(flights, year, month, desc(day))
-arrange(flights, year, desc(month), desc(day))
+arrange(diamonds, carat, price)
+arrange(diamonds, carat, desc(price))
+arrange(diamonds, desc(carat), desc(price))
 ```
 
+# Aggregating (5/5)
 ## Aggregate Data: `summarize()`
 - Aggregate/collapse the data into a single row
 - Think of as applying a function to columns
-```{r, eval=FALSE}
-summarize(flights, delay = mean(dep_delay))
-# Note that the mean function need help
-# handling NA values
-summarize(flights,
-          delay = mean(dep_delay, na.rm = TRUE))
+```{r}
+summarize(diamonds, avg_price = mean(price))
 ```
 
-- More useful as a grouped operation (see next)
+## Recap:
+- The five basic verbs: 
+
+verb          | action
+----          | ------
+`filter()`    | select a subset of *rows* by specified conditions
+`select()`    | select a subset of *columns*
+`mutate()`    | create a *new column* (often from existing columns)
+`arrange()`   | reorder (sort) *rows* by values of specified *column*(s)
+`summarize()` | aggregate values and reduce to single value
+
+- But what about ...
+    - Average price of diamonds for each cut type?
+    - Largest (carat) diamond in each color category?
+    - ...
+
+## Bad example:
+- A natural, but tedious way to compute:
+- Average price of diamonds for each cut type?
+    - use `filter` to create five different data frames, one for each `cut` type
+    - use `summarize` to compute the mean price for each data frame
+- Largest (carat) diamond in each color category?
+    - use `filter` to create seven different data frames, one for each 
+    `color` category
+    - use `arrange` to sort in descending order of `carat` for each data frame
+    - use `slice` to get the first row from each of the `arrange`d data frames
+    
+- The pattern:
+    - split the data, `group`ing `by` some categorical value
+    - do some operations, but to each category of the `group`
 
 ## Split-Apply-Combine
 
 ![Illustration of SAC](../img/sac.jpg)
 
-
 ## Grouped Operations
 - If a data frame is *grouped*, operations are applied to each group separately,
 and the results are combined back to a single data frame
-- Use the `group_by()` verb to specify variables to use for generating groups
-```{r, results='hide'}
-flights_by_day <- group_by(flights, day)
+- The `group_by()` verb lets you specify the *grouping* variables (e.g., `cut`, 
+`color`)
+```{r, results="hide"}
+diamonds_by_cut <- group_by(diamonds, cut)
 ```
-- Some verbs have specific behavior when applied to grouped data
+- When the data frame is `group_by`'d, all verbs/functions will operate as if 
+each category of the grouping variable is its own data frame, e.g., 
 
-verb | group specific action
---- | ---
-`arrange()` | sort rows within each group
-`slice()` | extract rows within each group
+verb          | group specific action
+------------- | ------------------------------------------------------
+`arrange()`   | sort rows within each group
+`slice()`     | extract rows within each group
 `summarize()` | aggregate values group-wise
+`n()`         | count the number of rows in each group
 
 ## Grouped `slice()`
-- Retrieve the first 2 departures (rows) of each day
+- Retrieve one diamond from each cut
 ```{r}
-slice(flights_by_day, 1:2)
+slice(diamonds_by_cut, 1)
 ```
 
 ## Grouped `summarize()`
-- Retrieve (1) number of departures (observations), (2) average distance, and  (3)
-average arrival delay for each day (i.e., for flights grouped by day)
-```{r, eval=FALSE}
-summarize(flights_by_day,  count = n(),
-          dist = mean(distance, na.rm=TRUE),
-          delay = mean(arr_delay, na.rm=TRUE))
+- Retrieve (1) number of diamonds and (2) average price by cut type
+```{r}
+summarize(diamonds_by_cut,
+          count = n(),
+          avg_price = mean(price))
 ```
-```{r, echo=FALSE}
-data.frame(head(summarize(flights_by_day,  count = n(),
-          dist = mean(distance, na.rm=TRUE),
-          delay = mean(arr_delay, na.rm=TRUE)), 6))
-```
+
+# Multiple (Chained) Operations
 
 ## Multiple (Chained) Operations
-- Consider the following task
+- Wish to compute: Proportion of different `color`s in each `cut` category
 
-> find days when the mean arrival delay OR departure delay was greater than 30
+- We can achieve the desired result with a few operations
+    1. **`group_by`** `cut`
+    2. **`mutate`** to create a column with total diamonds for each `cut`
+    3. re-**`group_by`** `cut` and `color`
+    4. Use the new column from above to `summarize` the proportion of each
+    `color` within each `cut`
 
-- We can achieve the desired result with three operations
-    1. **`group_by`** date (`year`, `month`, `day`)
-    2. **`summarize`** mean arrival/departure delay
-    3. **`filter`** summarized results (i.e., mean `arr_delay` > 30
-    | mean `dep_delay` > 30)
-
-- Note that `dplyr` verbs do **not** modify the original data frame
+- Note that `dplyr` verbs do **not** modify the original data frame (i.e., they
+don't have side effects)
     - This is generally a good thing, since it guarantees the integrity of your data
     - But it makes multiple operations on a data frame difficult
-- There are two (acceptable) ways to apply multiple operations on a data frame,
-and one is definitely prefered to the other
 
 ## Multiple Operations: The OK Way
 - One way to perform multiple operations is to save intermediate data frames as
 new data frames
 - This method delivers desired results, but makes your workspace quite messy
-(i.e., you'll end up with a workspace full of intermediate results)
+(i.e., you"ll end up with a workspace full of intermediate results)
 ```{r, eval=FALSE}
-flights_by_date <- group_by(flights, year, month, day)
-summary_by_date <- summarize(
-  flights_by_date,
-  arr = mean(arr_delay, na.rm=TRUE),  
-  dep = mean(dep_delay, na.rm=TRUE)) 
-big_delay_dates <- filter(
-  summary_by_date,
-  arr > 30 | dep > 30)
+by_cut <- group_by(diamonds, cut)
+count_cuts <- mutate(by_cut, N = n())
+by_cut_and_color <- group_by(count_cuts, cut, color)
+proportions <- summarize(by_cut_and_color,
+                         prop = mean(n()/N))
 ```
 - This method might be prefered if you need the intermediate results in
 the future
 - If not, there is a better way to chain multiple operations with `dplyr`
 
 ## The Pipe Operator `%>%`
-- The pipe operator, aka the 'magic' operator, takes the output from the verb on
-its left-hand side, and uses it as the first argument (data frame) for the verb
-on the right-hand side
+- The pipe operator, takes the output from its left-hand side, and uses it as
+the first argument to whatever is on its right-hand side[^pipe]
+- For example:
 ```{r, eval=FALSE}
-big_delay_dates <- flights %>% 
-  group_by(year, month, day) %>% 
-  summarize(arr = mean(arr_delay, na.rm=TRUE), 
-            dep = mean(dep_delay, na.rm=TRUE)) %>% 
-  filter(arr > 30 | dep > 30)
+by_cut <- group_by(diamonds, cut)
+count_cuts <- mutate(by_cut, N = n())
+```
+is equivalent to 
+```{r, eval=FALSE}
+count_cuts <- diamonds %>% 
+  group_by(cut) %>%  
+  mutate(N = n())
+```
+(except in the second case, the `by_cut` data frame is never created)
+
+[^pipe]: `Ctrl + Shift + M` will insert `%>%` in Rstudio
+
+## The Pipe Operator `%>%`
+- Using the pipe, we can complete the entire task without saving any
+intermediate data frames
+```{r, eval=FALSE}
+proportions <- diamonds %>% 
+  group_by(cut) %>% 
+  mutate(N = n()) %>% 
+  group_by(cut, color) %>% 
+  summarize(prop = mean(n()/N))
 ```
 - No need to save intermediate results
 - Easier to read (i.e., you can follow the operations step-by-step without too
 much mental accounting)
 
-## The Pipe Operator `%>%` -- Best Practice
-- Always using the pipe operator -- across multiple lines -- makes it easier to 
-add/remove/move things around, even for single expressions, i.e.,
-```{r, eval=FALSE}
-flights_by_date <- flights %>% 
-  group_by(year, month, day)
-```
-
 ## `dplyr`: Exercise
-- With the `flights` data
-    1. find the average speed (`distance / air_time * 60`) by each carrier
-    (ignore `NA`), and sort the data in descending order of average speed
-    2. find the number of flights and average flight time of all flights greater
-    than 10 hours by each carrier in April
+- Find the most expensive diamond for each `cut`.
+- How many 1 carat diamonds are "Premium" `cut`, and what are the min/median/max
+prices?
+- What is the average price for diamonds grouped by 0.1 `carat`s?
 
 # Exercise Solution
 
@@ -658,30 +631,42 @@ flights_by_date <- flights %>%
 - Solutions to the exercise are presented in the next slide
 - Try the exercise before proceeding!
 
-## Solution 1
-```{r, results='hide'}
-speed_by_carrier <- flights %>% 
-  group_by(carrier) %>% 
-  mutate(speed = distance / air_time * 60) %>% 
-  summarize(avg_speed = mean(speed, na.rm=TRUE)) %>% 
-  arrange(desc(avg_speed))
-speed_by_carrier
-```
-```{r, echo=FALSE}
-head(as_tibble(speed_by_carrier, 8))
+## Solutions
+- Find the most expensive diamond for each `cut`.
+```{r}
+diamonds %>% 
+  group_by(cut) %>% 
+  arrange(desc(price)) %>% 
+  slice(1)
 ```
 
-## Solution 2
-```{r, results='hide'}
-april_long_flights <- flights %>% 
-  group_by(month, carrier) %>% 
-  filter(month == 4 & hour > 10) %>% 
-  summarize(avg = mean(hour, na.rm=TRUE), count = n())
-april_long_flights
+## Solutions
+- How many 1 carat diamonds are "Premium" `cut?
+```{r}
+diamonds %>% 
+  filter(carat == 1, cut == "Premium") %>% 
+  summarize(N = n(),
+            min = min(price),
+            med = median(price),
+            max = max(price))
 ```
-```{r, echo=FALSE}
-head(as_tibble(april_long_flights, 8))
+
+## Solutions
+- What is the average price for diamonds grouped by 0.1 `carat`s?
+```{r}
+diamonds %>% 
+  mutate(carat_bin = round(carat, digits = 1)) %>% 
+  group_by(carat_bin) %>% 
+  summarize(avg_price = mean(price)) 
 ```
+
+## Reference
+- A great "cheat sheet" for wrangling data with `dplyr` and `tidyr` is available
+for free at
+https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf
+
+- Introductory text book by the creator of `tidyverse`:
+http://r4ds.had.co.nz/
 
 # Reshape Data with `tidyr`
 
@@ -725,11 +710,8 @@ is also loaded
 - You can also, but don't have to, install and load `tidyr` as a standalone
 package like you  would any other `R` package
 ```{r, eval=FALSE}
-# Install, if you haven't already.
 # Only need to do this once on a single machine.
 install.packages('tidyr')
-```
-```{r, results='hide', message=FALSE}
 # load package into workspace
 library('tidyr')
 ```

@@ -14,7 +14,7 @@ output:
 ## Dependencies
 
 - Please download and install 
-    - Latest version ($\ge$ `3.1.2`) of `R`  
+    - Latest version `R`  
       (*free* -- GPL -- from <https://www.r-project.org/>)
     - Latest version of `Rstudio` 
       (also *free* -- [AGPL](http://www.gnu.org/licenses/agpl-3.0.txt) -- from <https://www.rstudio.com/>)
@@ -36,8 +36,10 @@ output:
 - Save/load environment as `.Rdata` file
 - `Ctrl` + `L`: Clear console
 - `Ctrl` + `#`: Focus on panel `#`
-- `Ctrl` + `Enter`: Execute selection
+- `Ctrl` + `Enter`: Execute line/selection
+- `Ctrl` + `Shift` + `A`: Auto-format selected code
 - `Ctrl` + `Shift` + `C`: Comment/Uncomment selection
+- `Ctrl` + `Shift` + `/`: Reflow comments
 - Many more (if you're willing to explore)
 
 # `R` Basics
@@ -70,7 +72,7 @@ setwd("~/R")
 ```
 
 ## `R` Basics: Assignments
- - Convention for assigning values to variables is `<-`
+ - Convention for assigning values to variables is an arrow(`<-`)[^1]
  - Direction of arrow indicates direction of assignment
 ```{r, eval=FALSE}
 A <- 12
@@ -85,6 +87,8 @@ A  # 24
 A = 12  # good
 12 = A  # BAD
 ```
+
+[^1]: There are also double arrows (`<<-`) that do something slightly different. We won't talk about it, but if you're interested, see [here ](https://stackoverflow.com/questions/2628621/how-do-you-use-scoping-assignment-in-r)
 
 ## `R` Basics: Strings
 - A `String` variable can be declared in either double quotes(`""`) or 
@@ -383,11 +387,13 @@ if (condition) {
 - Best practice is to make conditions explicit whenever possible
 
 ## Loops: Note!
-- Loops in `R` are inefficient
+- Loops in `R` are inefficient[^loops]
 - For most cases, there will be a much faster, *vectorized* alternative to 
 looping
 - We cover loops because there are some *rare* cases in which a loop might make 
 more sense, but in general, loops should be avoided when writing `R`
+
+[^loops]: Not necessarily true, but loops are still best avoided for other reasons too.
 
 ## Loops
 - `for` statements
@@ -466,6 +472,7 @@ apply(DATA, MARGIN, FUNCTION)
 apply(X, 1, var)  # variance of rows
 apply(X, 2, var)  # variance of columns
 ```
+
 
 
 # Exercise
