@@ -54,12 +54,19 @@ getwd()
 ```{r, eval=FALSE}
 setwd("path")
 ```
+
+## `R` Basics: Working Directory (cont'd)
  - Note that `~` is replaced with your `HOME` directory, e.g. 
  `C:\Users\Username\Documents` in windows
  - Use forward slashes (`/`), even on Windows!
 ```{r, eval=FALSE, tidy=TRUE}
 setwd("~/R")  
 ```
+ - **Never** set the working directory to an absolute path in your `R` script
+     - Even better, organize your scripts such that you never have to change the 
+     working directory 
+     - `setwd()` is best reserved for that time when you started `R` from the 
+     wrong directory
 
 ## `R` Basics: Math Operations
 - Simple math operations
@@ -338,7 +345,7 @@ sprintf('one plus one = %d', 1+1)
 
 ## Functions for Strings (cont'd)
 - Often, we want to concatenate strings with no spaces 
-(e.g., when constructing filenames/paths in run-time)
+(e.g., when constructing filenames/paths at run-time)
 ```{r}
 # short-hand for concatenation w/o spaces
 filename = 'some_file_name.csv'
@@ -388,12 +395,12 @@ if (condition) {
 
 ## Loops: Note!
 - Loops in `R` are inefficient[^loops]
-- For most cases, there will be a much faster, *vectorized* alternative to 
-looping
-- We cover loops because there are some *rare* cases in which a loop might make 
-more sense, but in general, loops should be avoided when writing `R`
+- For many cases, there will be a much faster, *vectorized* alternative 
+  to looping
+- We cover loops because there are some *rare* cases in which a loop might 
+  make more sense, but in general, loops should be avoided when writing `R`
 
-[^loops]: Not necessarily true, but loops are still best avoided for other reasons too.
+[^loops]: Not entirely true, but loops are still best avoided for other reasons too.
 
 ## Loops
 - `for` statements
@@ -458,8 +465,7 @@ is_good <- function(vec) {
 ## `apply`
 - Loops in `R` are inefficient, and best avoided if possible
 - Vectorize operations whenever possible. 
-- Using `apply` to *loop* over rows/columns of matrix/table is considerd
-best practice (in terms of clarity)
+- Use `apply` to *loop* over rows/columns of matrix/table
 ```{r, eval=FALSE}
 apply(DATA, MARGIN, FUNCTION)
 # MARGIN = 1 applies FUNCTION to each row of DATA
@@ -488,8 +494,8 @@ apply(X, 2, var)  # variance of columns
     2. find the portion that can be made into a triangle (hint: use the 
     `is_good` function)
 
-## Answer 1: A (not too good) Way
-```{r}
+## Answer 1: Using a for loop
+```{r, cache=TRUE}
 system.time({  # measure execution time
   N <- 1e5; 
   m <- 0
@@ -503,8 +509,8 @@ system.time({  # measure execution time
 })
 ```
 
-## Answer 2: Preferred `R` Way
-```{r}
+## Answer 2: No loop - possibly faster but uses more memory 
+```{r, cache=TRUE}
 system.time({  # measure execution time
   N <- 1e5; 
   X <- matrix(runif(N*3), nrow=3, ncol=N)
@@ -539,5 +545,25 @@ your current workspace with the `library()` command
 ```{r, eval=FALSE}
 library("tidyverse")
 ```
-- Note: If you ever need to use the two packages `plyr` and `tidyverse` within 
-the same workspace (which you will), ALWAYS (!!!) load `plyr` first!
+
+- You can also use specific functions from a package without loading it,
+  by telling `R` which package the function belongs to with a namespace prefix,
+  `package_name::`.
+- For example, to use the `round_any()` function from the `plyr` package,
+  without actually loading `plyr`, write
+```{r, eval=FALSE}
+# Assuming plyr is installed
+plyr::round_any()
+```
+
+## Namespace collision
+- One of the (unfortunately many) things that `R` is bad at is preventing 
+  namespace collisions
+- For example, the packages `plyr` and `dplyr`[^dplyr] have functions that are 
+  named the same (e.g, `mutate()`, `summarize()`), and if you ever load both,
+  `R` will only "see" the function belonging to the package you loaded later
+- So beware of what packages you load, and if you only intend to use a function
+  or two, consider just specifying the namespace with `::`, instead of loading
+  the whole package.
+
+[^dplyr]: `dplyr` is part the tidyverse, and loaded when you load `tidyverse`
