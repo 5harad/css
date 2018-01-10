@@ -18,6 +18,9 @@ output:
       (*free* -- GPL -- from <https://www.r-project.org/>)
     - Latest version of `Rstudio` 
       (also *free* -- [AGPL](http://www.gnu.org/licenses/agpl-3.0.txt) -- from <https://www.rstudio.com/>)
+      
+- Alternatively, use cloud services such as 
+  [MatrixDS](http://matrixds.com) (http://matrixds.com) [beta]
   
 ## A Question
 > You are given three sticks, each of a random length between 0 and 1.

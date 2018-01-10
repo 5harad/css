@@ -19,17 +19,21 @@ output:
 
 ```{r, eval=FALSE}
 # The single tidyverse package now includes
-# dplyr and tidyr
+# dplyr, tidyr, and many more
 install.packages('tidyverse')
 # install.packages('dplyr')
 # install.packages('tidyr')
-# install.packages('readr')
-# install.packages('ggplot2')
 ```
 ```{r, echo=FALSE, results='hide', message=FALSE}
 options(width=50)
 library('tidyverse')
 ```
+
+- Alternatively, use cloud services such as 
+  [MatrixDS](http://matrixds.com) (http://matrixds.com) [beta]
+    - Works out-of-the-box (almost?)
+    - Consistent access to Rstudio via browser (on all devices)
+    - Easily manage/share files with others
 
 ## Data Frames: Introduction
 - Data frames are the primary representation of data in `R`

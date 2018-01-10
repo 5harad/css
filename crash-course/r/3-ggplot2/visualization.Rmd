@@ -19,14 +19,9 @@ output:
 - A bunch of *free* packages
 ```{r, eval=FALSE}
 # for general plotting
-install.packages('tidyverse')  # ggplot2 
-install.packages('scales') 
+install.packages('tidyverse')  
 # spacial visualization on maps
 install.packages('ggmap')   
-# for data pre-processing  and formatting
-# (both dplyr and tidyr now included in tidyverse)
-# install.packages('dplyr')
-# install.packages('tidyr')
 ```
 ```{r, echo=FALSE, results='hide', message=FALSE}
 options(width=50)
@@ -37,6 +32,16 @@ library('ggmap')
 
 theme_set(theme_bw())
 ```
+
+- Alternatively, use cloud services such as 
+  [MatrixDS](http://matrixds.com) (http://matrixds.com) [beta]
+    - Consistent access to Rstudio via browser (on all devices)
+    - Easily manage/share files with others
+  
+```{r, eval=FALSE}
+install.packages('ggmap')   
+```
+
 
 ## Visualization: Introduction
 - There is more than one framework for thinking about data visualization, e.g.,
@@ -990,7 +995,5 @@ p
 ```
 
 ## Reference
-- A great "cheat sheet" for data visualization with `ggplot2` is available
-for free at 
-https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf
-- Or Help > Cheatsheets > Data visualization ... in Rstudio
+- A great "cheat sheet" for data visualization provided with Rstudio
+- See Help > Cheatsheets > Data visualization ...
