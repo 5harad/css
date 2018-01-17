@@ -252,7 +252,7 @@ data <- read_tsv('data.tsv', col_names = TRUE)
 ## Specify types for columns
 - You can use the output message from the previous `read_tsv()` call as a boiler
 plate input to the `col_types` parameter, e.g.,
-```{r}
+```{r, warning=FALSE}
 data <- read_tsv('data.tsv', col_types = cols(
   age = col_double(),
   personality = col_character(),
@@ -693,8 +693,7 @@ hodor | 9 | 10 | 9
 - What are the benefits of this representation?
 
 ## Introduction to `tidyr`: An Example
-- For data manipulation/visualization we often prefer to have data in the
-*long* form
+- For data manipulation/visualization we often prefer to have data in *long* form
 - The *long* form of the previous data would be
 
 ID | HW | Score
