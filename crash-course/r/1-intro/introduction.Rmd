@@ -219,18 +219,6 @@ X[5] <- 555
 X
 ```
 
-## Vectors: Advanced Indexing
-- Vectors can be indexed by a binary vector (`TRUE/FALSE`) of equal length
-- i.e., you can index vectors by a specified condition, e.g.,
-```{r}
-X <- 1:100
-# create a binary vector with the same length of X
-# where the element is TRUE if the element of X
-# in the corresponding position satisfies condition
-ind <- X > 95
-tail(ind)  # take a peek at the last few entries
-X[ind]
-```
 
 # Vector Operations
 
@@ -273,18 +261,6 @@ length(X)              # length of the vector
 range(X)               # range
 ```
 
-## Helpful Matrix Functions
-- If possible, avoid `loops` by operating over the Vector/Matrix as a whole
-```{r, eval=FALSE}
-rowSums(A)   # Row sums
-colSums(A)   # Column sums
-rowMeans(A)  # Row means
-colMeans(A)  # Columns means
-diag(A)      # Diagonal of a matrix
-solve(A)     # Inverse of a matrix
-cov(A)       # Variance covariance matrix
-cor(A)       # Correlation matrix
-```
 
 # Built-in functions
 
