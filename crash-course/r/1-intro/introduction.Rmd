@@ -1,8 +1,8 @@
 ---
 title: "`R` crash course - Introduction"
 author: "Jongbin Jung"
-output: 
-  beamer_presentation: 
+output:
+  beamer_presentation:
     fig_height: 5
     fig_width: 5
     fonttheme: professionalfonts
@@ -13,15 +13,15 @@ output:
 
 ## Dependencies
 
-- Please download and install 
-    - Latest version `R`  
+- Please download and install
+    - Latest version `R`
       (*free* -- GPL -- from <https://www.r-project.org/>)
-    - Latest version of `Rstudio` 
+    - Latest version of `Rstudio`
       (also *free* -- [AGPL](http://www.gnu.org/licenses/agpl-3.0.txt) -- from <https://www.rstudio.com/>)
-      
-- Alternatively, use cloud services such as 
-  [MatrixDS](http://matrixds.com) (http://matrixds.com) [beta]
-  
+
+- Alternatively, use cloud services such as
+  [MatrixDS](http://matrixds.com) (http://matrixds.com)
+
 ## A Question
 > You are given three sticks, each of a random length between 0 and 1.
 
@@ -48,7 +48,7 @@ output:
 # `R` Basics
 
 ## `R` Basics: Working Directory
- - Working directory (`wd`) is where your `R` session will load/save files 
+ - Working directory (`wd`) is where your `R` session will load/save files
  - To see where your current working directory is, run
 ```{r, eval=FALSE}
 getwd()
@@ -59,16 +59,16 @@ setwd("path")
 ```
 
 ## `R` Basics: Working Directory (cont'd)
- - Note that `~` is replaced with your `HOME` directory, e.g. 
+ - Note that `~` is replaced with your `HOME` directory, e.g.
  `C:\Users\Username\Documents` in windows
  - Use forward slashes (`/`), even on Windows!
 ```{r, eval=FALSE, tidy=TRUE}
-setwd("~/R")  
+setwd("~/R")
 ```
  - **Never** set the working directory to an absolute path in your `R` script
-     - Even better, organize your scripts such that you never have to change the 
-     working directory 
-     - `setwd()` is best reserved for that time when you started `R` from the 
+     - Even better, organize your scripts such that you never have to change the
+     working directory
+     - `setwd()` is best reserved for that time when you started `R` from the
      wrong directory
 
 ## `R` Basics: Math Operations
@@ -98,10 +98,10 @@ A = 12  # good
 12 = A  # BAD
 ```
 
-[^1]: There are also double arrows (`<<-`) that do something slightly different. We won't talk about it, but if you're interested, see [here ](https://stackoverflow.com/questions/2628621/how-do-you-use-scoping-assignment-in-r)
+[^1]: There are also double arrows (`<<-`) that do something slightly different. We won't talk about it, but if you're interested, see [here](https://stackoverflow.com/questions/2628621/how-do-you-use-scoping-assignment-in-r)
 
 ## `R` Basics: Strings
-- A `String` variable can be declared in either double quotes(`""`) or 
+- A `String` variable can be declared in either double quotes(`""`) or
 single quotes (`''`)
 ```{r}
 s <- "This is a valid string"
@@ -115,7 +115,7 @@ s
 ```{r}
 x <- 860306  # first x is assigned a number
 x
-x <- 'This is a variable!' 
+x <- 'This is a variable!'
 x  # Now it is a string
 
 ```
@@ -123,7 +123,7 @@ x  # Now it is a string
 # Vectors
 
 ## Vectors: `c()`
- - Vectors are the building blocks of `R` --- even a single variable is actually 
+ - Vectors are the building blocks of `R` --- even a single variable is actually
  an "atomic" vector (vector of size 1)
  - Vectors in `R` are created by *c*oncatenating a series of elements
 ```{r}
@@ -133,7 +133,7 @@ Y <- c('this', 'that', 'those')
 Y  # this is a vector of Strings
 ```
 
-## Vectors: `seq()` 
+## Vectors: `seq()`
 - Create a vector from a sequence with `seq(from, to, by=1)`
 ```{r}
 seq(1, 10)
@@ -145,7 +145,7 @@ seq(1, 10, 2)
 ```
 
 ## Vectors: `rep()`
- - Use `rep()` to repeat values
+- Use `rep()` to repeat values
 ```{r}
 rep(13, 4)
 rep('Yes!', 3)
@@ -153,6 +153,13 @@ rep(c('Sat.', 'Sun.'), 2)
 ```
 
 ## Vectors: `r`*`dist`*`()`
+- Sometimes we want to generate samples from known distributions
+    - e.g., simulating 1,000 coin flips and counting the number of heads
+- For this, we can use the family of `r`*`dist`*`()` functions, where *`dist`*
+  is replaced with the desired distribution
+  (e.g., `unif`orm, `norm`al, `pois`son)
+
+## Vectors: `r`*`dist`*`()` examples
 - Generate vector of $n$ samples from a specified distribution
 ```{r, eval=FALSE}
 runif(n = 10)  # 10 samples from Unif(0, 1)
@@ -172,11 +179,13 @@ rnorm(n = 100, mean = 20, sd = 5)
 
 ## Vectors: Indexing
 - Use square braces (`[]`) to index a vector (base 1)
+    - Indexing out-of-bounds returns a special value called `NA`, *does NOT*
+      fail
 ```{r}
 X <- c(10, 11, 12, 13)
 X[1]
 X[4]
-X[5]
+X[5]  # Does NOT fail; but returns NA
 ```
 
 ## Vectors: Indexing (cont'd)
@@ -218,40 +227,16 @@ X <- 1:100
 # create a binary vector with the same length of X
 # where the element is TRUE if the element of X
 # in the corresponding position satisfies condition
-ind <- X > 95  
+ind <- X > 95
 tail(ind)  # take a peek at the last few entries
 X[ind]
 ```
 
-# Matrices
-
-## Creating Matrices
-- A matrix is created from a vector, using `matrix()`, e.g.
-```{r}
-X <- c(1:12)
-# syntax: matrix(vector, # of rows, # of columns)
-A <- matrix(X, 3, 4)
-A
-```
-
-- Notice that the matrix is created column-first
-
-## Matrix Indexing
-- Similar to vectors, a matrix can be indexed with square braces,
-with the syntax `[row #, col #]`, e.g.
-- Leaving an entry empty will result in the full row/column
-```{r}
-A[3,2]  # third row, second column
-A[2,]   # entire second row
-A[,4]   # entire fourth column
-```
-
-# Vector/Matrix Operations
+# Vector Operations
 
 ## Vector Operations
 ```{r}
 X = c(1:4)
-t(X)  # transpose (column) vector X to row vector
 X + X  # element-wise summation
 X - X  # element-wise subtraction
 ```
@@ -263,31 +248,7 @@ X * X  # element-wise multiplication
 X %*% X  # dot (inner) product
 ```
 
-## Matrix Operations
-```{r}
-A = matrix(1:4, 2, 2)  # create 2x2 matrix
-t(A)  # transpose (column) vector A to row vector
-A + A  # element-wise summation
-A - A  # element-wise subtraction
-```
-
-## Matrix Operations (cont'd)
-```{r}
-A^3   # element-wise exponentiation
-A * A  # element-wise multiplication
-A %*% A  # dot (inner) product
-```
-
-## Matrix Operations: Warning
-- Dimensions must make sense!
-```{r, error=TRUE}
-A <- matrix(1:6, 2, 3)
-B <- matrix(1:6, 3, 2)
-A %*% B  # 2x3 times 3x2: OK
-A %*% A  # 2x3 times 2x3: Nope
-```
-
-## Vector/Matrix Comparisons
+## Vector comparisons
 - Comparisons are all done element-wise
 ```{r}
 c(1, 2, 3) == c(1, 2, 4)
@@ -325,13 +286,13 @@ cov(A)       # Variance covariance matrix
 cor(A)       # Correlation matrix
 ```
 
-# Functions
+# Built-in functions
 
 ## Some more built-in functions
 - We've already seen many built-in functions, but here are some more!
 ```{r, eval=FALSE}
-log(X)   # element-wise log 
-exp(X)   # element-wise exponential 
+log(X)   # element-wise log
+exp(X)   # element-wise exponential
 sqrt(X)  # element-wise square root
 ```
 
@@ -339,20 +300,20 @@ sqrt(X)  # element-wise square root
 ## Functions for Strings
 ```{r}
 # concatenate two (or more) strings
-paste('one plus one equals', 1+1, '!')  
+paste('one plus one equals', 1+1, '!')
 # specify a separator
-paste('one plus one', 1+1, sep='=')  
+paste('one plus one', 1+1, sep='=')
 # if you're into C-style formatting ...
 sprintf('one plus one = %d', 1+1)
 ```
 
 ## Functions for Strings (cont'd)
-- Often, we want to concatenate strings with no spaces 
+- Often, we want to concatenate strings with no spaces
 (e.g., when constructing filenames/paths at run-time)
 ```{r}
 # short-hand for concatenation w/o spaces
 filename = 'some_file_name.csv'
-paste0('path/to/', filename)  
+paste0('path/to/', filename)
 # function specifically for constructing file paths
 file.path('path', 'to', filename)
 ```
@@ -379,28 +340,30 @@ str(obj)  # display structure of obj
 summary(obj)  # display summary of obj
 ```
 
+# Custom functions and control
+
 ## Control Flow
 - `if` statements
 ```{r, eval=FALSE}
-if (condition) { 
+if (condition) {
   # stuff to do when condition is TRUE
-} else if(other_condition) {  # (OPTIONAL) 
+} else if(other_condition) {  # (OPTIONAL)
   # stuff to do if other_condition is TRUE
-} else {  # (OPTIONAL) 
+} else {  # (OPTIONAL)
   # stuff to do if all other conditions are FALSE
 }
 ```
 
 - Some consider the catch-all `else` clause to be dangerous
-    - Some style guides even recommend avoiding the use of `else` for better 
+    - Some style guides even recommend avoiding the use of `else` for better
     readability
 - Best practice is to make conditions explicit whenever possible
 
 ## Loops: Note!
 - Loops in `R` are inefficient[^loops]
-- For many cases, there will be a much faster, *vectorized* alternative 
+- For many cases, there will be a much faster, *vectorized* alternative
   to looping
-- We cover loops because there are some *rare* cases in which a loop might 
+- We cover loops because there are some *rare* cases in which a loop might
   make more sense, but in general, loops should be avoided when writing `R`
 
 [^loops]: Not entirely true, but loops are still best avoided for other reasons too.
@@ -408,26 +371,26 @@ if (condition) {
 ## Loops
 - `for` statements
 ```{r, eval=FALSE}
-for (ind in sequence/set) {   
-  # iterate over sequence or elements of a set 
+for (ind in sequence/set) {
+  # iterate over sequence or elements of a set
   # do stuff
 }
 ```
 - `while` statements
 ```{r, eval=FALSE}
-while (condition) { 
-  # stuff to do while the condition is TRUE 
+while (condition) {
+  # stuff to do while the condition is TRUE
   # the condition must become FALSE at some point!
 }
 ```
 
 ## Loops: Example
 ```{r}
-for (i in 1:3) { 
+for (i in 1:3) {
   print(paste('iteration', i))
 }
 
-while (i >= 0) { 
+while (i >= 0) {
   print(paste('de-iteration', i))
   i <- i - 1  # beware of infinite loops!
 }
@@ -436,8 +399,8 @@ while (i >= 0) {
 ## User Defined Functions
 - Write your own functions in the form
 ```{r, eval=FALSE}
-name_of_function <- function(arguments) { 
-  # do some stuff with arguments 
+name_of_function <- function(arguments) {
+  # do some stuff with arguments
   return(result)
 }
 ```
@@ -447,12 +410,30 @@ name_of_function(arguments)  # gives you the 'result'
 ```
 
 ## User Defined Functions: Example
-- Write a function that will take a vector in $\mathbb{R}^3$ and tell you if you 
-can make a triangle or not
+- Write a function that will take a vector in $\mathbb{R}^3$ and tell you if you
+can make a triangle or not (i.e., return `TRUE` if a triangle can be made and 
+`FALSE` otherwise.)
+- A solution is on the next slide; try writing your own without looking ahead!
+
+## User Defined Functions: Example solution
 ```{r}
-is_good <- function(vec) { 
+is_good <- function(vec) {
+  for (i in 1:3) {
+    # Check if element i is greater than 
+    # sum of other two elements
+    if (vec[i] > sum(vec[-i])) {
+      return(FALSE)
+    }
+  }
+  return(TRUE)
+}
+```
+
+## User Defined Functions: Improved solution
+```{r}
+is_good <- function(vec) {
   if (length(vec) != 3) {
-      # it's always a good idea to make sure your 
+      # Always a good idea to make sure your
       # function gets what it expects to get
       stop('is_good requires a vector of length 3')
   }
@@ -465,22 +446,20 @@ is_good <- function(vec) {
 }
 ```
 
-## `apply`
+
+## `replicate`
 - Loops in `R` are inefficient, and best avoided if possible
-- Vectorize operations whenever possible. 
-- Use `apply` to *loop* over rows/columns of matrix/table
-```{r, eval=FALSE}
-apply(DATA, MARGIN, FUNCTION)
-# MARGIN = 1 applies FUNCTION to each row of DATA
-# MARGIN = 2 applies FUNCTION to each column of DATA
-# MARGIN = c(1,2) applies FUNCTION to both 
-#    rows and columns of DATA
-```
+- Vectorize operations whenever possible.
+- `replicate` can be used to repeat some operation (function),
+  and collect the results[^apply]
 - e.g., to get the variance of each row/column of a matrix $X$,
 ```{r, eval = FALSE}
 apply(X, 1, var)  # variance of rows
 apply(X, 2, var)  # variance of columns
 ```
+
+[^apply]: `replicate` is actually a convenient wrapper for one of the `apply` 
+functions, which are more general. See the documentation for details.
 
 
 
@@ -494,13 +473,13 @@ apply(X, 2, var)  # variance of columns
 - The answer is 1/2
 - Use `R` to simulate 100,000 times and estimate the answer by
     1. generate 100,000 triplets of uniform (0, 1) random variables
-    2. find the portion that can be made into a triangle (hint: use the 
+    2. find the portion that can be made into a triangle (hint: use the
     `is_good` function)
 
 ## Answer 1: Using a for loop
 ```{r, cache=TRUE}
 system.time({  # measure execution time
-  N <- 1e5; 
+  N <- 1e5;
   m <- 0
   for (i in 1:N) {
     X <- runif(3)
@@ -512,12 +491,11 @@ system.time({  # measure execution time
 })
 ```
 
-## Answer 2: No loop - possibly faster but uses more memory 
+## Answer 2: No loop 
 ```{r, cache=TRUE}
 system.time({  # measure execution time
-  N <- 1e5; 
-  X <- matrix(runif(N*3), nrow=3, ncol=N)
-  m <- apply(X, 2, is_good)
+  N <- 1e5;
+  m <- replicate(N, is_good(runif(3)))
   cat(sprintf('%.2f%%\n',  mean(m) * 100 ))
 })
 ```
@@ -525,14 +503,14 @@ system.time({  # measure execution time
 # Packages
 
 ## Installing `R` Packages
-- `R` has many (*MANY*) packages created by other users that implement 
+- `R` has many (*MANY*) packages created by other users that implement
 state-of-the-art tools (e.g., data manipulation, statistical models)
 - These packages can be downloaded from the Comprehensive R Archive Network (CRAN)
 - This is as simple as running a single line of code:
 ```{r, eval=FALSE}
 install.packages("package name")
 ```
-- You will have to select one of many CRAN mirrors (copies across different 
+- You will have to select one of many CRAN mirrors (copies across different
 servers) from which to download the package from
 - For example, to install the `tidyverse` package, run
 ```{r, eval=FALSE}
@@ -542,7 +520,7 @@ install.packages("tidyverse")
 
 
 ## Loading Packages
-- Once you've installed a package on a machine, you can load the package into 
+- Once you've installed a package on a machine, you can load the package into
 your current workspace with the `library()` command
 - For example, to use the `tidyverse` package, first load it with
 ```{r, eval=FALSE}
@@ -560,9 +538,9 @@ plyr::round_any()
 ```
 
 ## Namespace collision
-- One of the (unfortunately many) things that `R` is bad at is preventing 
+- One of the (unfortunately many) things that `R` is bad at is preventing
   namespace collisions
-- For example, the packages `plyr` and `dplyr`[^dplyr] have functions that are 
+- For example, the packages `plyr` and `dplyr`[^dplyr] have functions that are
   named the same (e.g, `mutate()`, `summarize()`), and if you ever load both,
   `R` will only "see" the function belonging to the package you loaded later
 - So beware of what packages you load, and if you only intend to use a function
