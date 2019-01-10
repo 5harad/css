@@ -428,15 +428,13 @@ is_good <- function(vec) {
 - Vectorize operations whenever possible.
 - `replicate` can be used to repeat some operation (function),
   and collect the results[^apply]
-- e.g., to get the variance of each row/column of a matrix $X$,
+- e.g., to run `some_function()` 1,000 times and collect the results:
 ```{r, eval = FALSE}
-apply(X, 1, var)  # variance of rows
-apply(X, 2, var)  # variance of columns
+replicate(1000, some_function())  
 ```
 
 [^apply]: `replicate` is actually a convenient wrapper for one of the `apply` 
 functions, which are more general. See the documentation for details.
-
 
 
 # Exercise
