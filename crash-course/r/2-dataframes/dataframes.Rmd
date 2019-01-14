@@ -18,7 +18,7 @@ output:
 - A bunch of *free* packages
 
 ```{r, eval=FALSE}
-# The single tidyverse package now includes
+# The single tidyverse package includes
 # dplyr, tidyr, and many more
 install.packages('tidyverse')
 # install.packages('dplyr')
@@ -29,11 +29,10 @@ options(width=50)
 library('tidyverse')
 ```
 
-- Alternatively, use cloud services such as 
-  [MatrixDS](http://matrixds.com) (http://matrixds.com) [beta]
-    - Works out-of-the-box (almost?)
+- Alternatively, use cloud services such as
+  [MatrixDS](https://matrixds.com) (https://matrixds.com)
+    - Works out-of-the-box
     - Consistent access to Rstudio via browser (on all devices)
-    - Easily manage/share files with others
 
 ## Data Frames: Introduction
 - Data frames are the primary representation of data in `R`
@@ -50,12 +49,13 @@ each column is a vector that belongs to the (parent) data frame
 data frames
 
 ## Data Frames: First Impression
-- Let's take a look at an existing dataset, `txhousing` (loaded with `ggplot2` 
+- Let's take a look at an existing dataset, `txhousing` (loaded with `ggplot2`
 --- which is loaded with `tidyverse`)
-- Contains data (9 variables) on 8,602 observations about the housing market in 
+- Contains data (9 variables) on 8,602 observations about the housing market in
 Texas, from 2000 to 2015
 - See documentation for details on what the 9 variables are
 ```{r, eval=FALSE}
+library("tidyverse")  # or library("ggplot2")
 ?txhousing
 ```
 
@@ -151,16 +151,16 @@ data[[1]]
 ## Indexing: Numeric Row/Column
 - Since a data frame is a table of data, you can treat it like a matrix, and
 index its entries by `[row #, col #]` notation
-```{r}
+```{r, eval=FALSE}
 data[2, 3]  # item in row 2 column 3
-data[, 2]  # entire column 2
-data[4, ]  # entire row 4
+data[, 2]   # entire column 2
+data[4, ]   # entire row 4
 ```
 
 ## Indexing: Named Variables
 - Since the columns represent variables with names, you can index columns by a
 string representing variable names
-```{r}
+```{r, eval=FALSE}
 data[, 'age']  # entire 'age' column
 # entries 3~5 of 'personality' column
 data[3:5, 'personality']
@@ -209,7 +209,7 @@ data
 ```
 
 ## Write Data Frames to Files
-- Use `write_tsv()` (from the `readr` package) to write data frames to 
+- Use `write_tsv()` (from the `readr` package) to write data frames to
 tab-separated (text) files
 - The syntax is
 ```
@@ -346,7 +346,7 @@ summary(paris$inventory)
 handful of useful functions) for wrangling data (frames)
 - `dplyr` is a part of the `tidyverse`, so if you load `tidyverse`, `dplyr` is
 also loaded
-- You can also, but don"t have to, install and load the `dplyr` as a standalone
+- You can also, but don't have to, install and load the `dplyr` as a standalone
 package like you  would any other `R` package
 ```{r, eval=FALSE}
 # Only need to do this once on a single machine.
@@ -358,18 +358,18 @@ library("dplyr")
 ## Data Frames: First Impression
 - We'll primarily use the `diamonds` data that's included with `tidyverse`
 - Take a look by typing `diamonds` in the `R` console
-- `diamonds` is a dataset containing the prices and other attributes of almost 
+- `diamonds` is a dataset containing the prices and other attributes of almost
 54,000 diamonds. Included variables are:
     - price, carat, cut, color, clarity, dimensions (x, y, z, depth, table)
-    
-- See documentation for more details 
+
+- See documentation for more details
 ```{r, eval=FALSE}
 ?diamonds
 ```
 
 ## Verbs
-- A *verb* in the world of `dplyr` is a function that 
-    - takes a data frame as its first argument, and 
+- A *verb* in the world of `dplyr` is a function that
+    - takes a data frame as its first argument, and
     - returns another data frame as a result
 - For example, the `head()` function can be considered a verb
 ```{r, eval=FALSE}
@@ -461,7 +461,7 @@ rename(diamonds, cut_type = cut)
 - You can refer to new columns you just created, inside the same `mutate()`
 function
 ```{r, eval=FALSE}
-mutate(diamonds, 
+mutate(diamonds,
        price_per_carat = price / carat,
        volume = x * y * z,
        # Use the volume column we just created
@@ -470,7 +470,7 @@ mutate(diamonds,
 ```
 - Use `transmute()` to create a new data frame *just from* the new column(s)
 ```{r, eval=FALSE}
-transmute(diamonds, carat, 
+transmute(diamonds, carat,
           price_per_carat = price / carat)
 ```
 
@@ -494,7 +494,7 @@ summarize(diamonds, avg_price = mean(price))
 ```
 
 ## Recap:
-- The five basic verbs: 
+- The five basic verbs:
 
 verb          | action
 ----          | ------
@@ -515,11 +515,11 @@ verb          | action
     - use `filter` to create five different data frames, one for each `cut` type
     - use `summarize` to compute the mean price for each data frame
 - Largest (carat) diamond in each color category?
-    - use `filter` to create seven different data frames, one for each 
+    - use `filter` to create seven different data frames, one for each
     `color` category
     - use `arrange` to sort in descending order of `carat` for each data frame
     - use `slice` to get the first row from each of the `arrange`d data frames
-    
+
 - The pattern:
     - split the data, `group`ing `by` some categorical value
     - do some operations, but to each category of the `group`
@@ -531,13 +531,13 @@ verb          | action
 ## Grouped Operations
 - If a data frame is *grouped*, operations are applied to each group separately,
 and the results are combined back to a single data frame
-- The `group_by()` verb lets you specify the *grouping* variables (e.g., `cut`, 
+- The `group_by()` verb lets you specify the *grouping* variables (e.g., `cut`,
 `color`)
 ```{r, results="hide"}
 diamonds_by_cut <- group_by(diamonds, cut)
 ```
-- When the data frame is `group_by`'d, all verbs/functions will operate as if 
-each category of the grouping variable is its own data frame, e.g., 
+- When the data frame is `group_by`'d, all verbs/functions will operate as if
+each category of the grouping variable is its own data frame, e.g.,
 
 verb          | group specific action
 ------------- | ------------------------------------------------------
@@ -601,10 +601,10 @@ the first argument to whatever is on its right-hand side[^pipe]
 by_cut <- group_by(diamonds, cut)
 count_cuts <- mutate(by_cut, N = n())
 ```
-is equivalent to 
+is equivalent to
 ```{r, eval=FALSE}
-count_cuts <- diamonds %>% 
-  group_by(cut) %>%  
+count_cuts <- diamonds %>%
+  group_by(cut) %>%
   mutate(N = n())
 ```
 (except in the second case, the `by_cut` data frame is never created)
@@ -615,10 +615,10 @@ count_cuts <- diamonds %>%
 - Using the pipe, we can complete the entire task without saving any
 intermediate data frames
 ```{r, eval=FALSE}
-proportions <- diamonds %>% 
-  group_by(cut) %>% 
-  mutate(N = n()) %>% 
-  group_by(cut, color) %>% 
+proportions <- diamonds %>%
+  group_by(cut) %>%
+  mutate(N = n()) %>%
+  group_by(cut, color) %>%
   summarize(prop = mean(n()/N))
 ```
 - No need to save intermediate results
@@ -640,17 +640,17 @@ prices?
 ## Solutions
 - Find the most expensive diamond for each `cut`.
 ```{r}
-diamonds %>% 
-  group_by(cut) %>% 
-  arrange(desc(price)) %>% 
+diamonds %>%
+  group_by(cut) %>%
+  arrange(desc(price)) %>%
   slice(1)
 ```
 
 ## Solutions
 - How many 1 carat diamonds are "Premium" `cut?
 ```{r}
-diamonds %>% 
-  filter(carat == 1, cut == "Premium") %>% 
+diamonds %>%
+  filter(carat == 1, cut == "Premium") %>%
   summarize(N = n(),
             min = min(price),
             med = median(price),
@@ -660,10 +660,10 @@ diamonds %>%
 ## Solutions
 - What is the average price for diamonds grouped by 0.1 `carat`s?
 ```{r}
-diamonds %>% 
-  mutate(carat_bin = round(carat, digits = 1)) %>% 
-  group_by(carat_bin) %>% 
-  summarize(avg_price = mean(price)) 
+diamonds %>%
+  mutate(carat_bin = round(carat, digits = 1)) %>%
+  group_by(carat_bin) %>%
+  summarize(avg_price = mean(price))
 ```
 
 ## Reference
@@ -727,8 +727,8 @@ grades <- tibble(
   HW1 = runif(3, 1, 10),
   HW2 = runif(3, 1, 10),
   HW3 = runif(3, 1, 10),
-  info = c('male/lannister', 
-           'female/lannister', 
+  info = c('male/lannister',
+           'female/lannister',
            'male/stark'))
 grades
 ```
@@ -767,8 +767,8 @@ variables, e.g., splitting a `date` column to `year`, `month`, and `day`
 ## Split a Column to with `separate()` (cont'd)
 ```{r, results='hide'}
 grades_split <- separate(
-  grades_tidy, info, 
-  into = c('sex', 'house'), 
+  grades_tidy, info,
+  into = c('sex', 'house'),
   sep = '/'
   )
 grades_split
@@ -783,8 +783,8 @@ operator `%>%`
 - For example, we can do the previous operations on the `grades` data with the
 chained operation
 ```{r}
-grades_final <- grades %>% 
-  gather(HW, score, HW1:HW3) %>% 
+grades_final <- grades %>%
+  gather(HW, score, HW1:HW3) %>%
   separate(info, into=c('sex', 'house'), sep='/')
 ```
 - `tidyr` verbs can also be chained with `dplyr` verbs (and any other function
@@ -813,8 +813,8 @@ ID | type | year | amount
 
 ## Solution 1
 ```{r, results='hide'}
-finance <- finance %>% 
-  gather(year, amount, 2:7) %>% 
+finance <- finance %>%
+  gather(year, amount, 2:7) %>%
   separate(year, c('type', 'year'), sep='_')
 finance
 ```
@@ -824,8 +824,8 @@ head(finance, 8)
 
 ## Solution 2
 ```{r}
-finance_summary <- finance %>% 
-  group_by(ID, type) %>% 
+finance_summary <- finance %>%
+  group_by(ID, type) %>%
   summarize(mean=mean(amount), total=sum(amount))
 finance_summary
 ```
