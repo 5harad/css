@@ -40,6 +40,15 @@ to tell Jupyter where to find the kernel spec. (For more detail on these two ste
 
 Now, when you run `jupyter lab`, you should see the option to create a notebook with the `R` kernel.
 
+## Installing tidyverse
+
+The tidyverse is a collection of powerful libraries for working with data. These tools make common data manipulation and visualization tasks easy.
+
+To install, open the interactive `R` shell again and run:
+```
+install.packages("tidyverse")
+```
+
 ### Python 3
 
 The Python 3 kernel should be available by default when you open JupyterLab.
