@@ -1,6 +1,6 @@
 # Introduction to Computational Social Science
 
-Course website: https://5harad.com/mse231
+Course website: https://5harad.com/mse231/
 
 Please follow the instructions below to ensure that your computing setup is sufficient for the course.
 
