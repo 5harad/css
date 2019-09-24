@@ -28,7 +28,7 @@ If you do not see JupyterLab open, read the output of the command you ran in the
 
 By default, JupyterLab does not have the ability to execute R code. In order to use R with JupyterLab, you need to install the `IRkernel` package.
 
-In either an `R` shell started from the terminal,
+In an `R` shell started from the terminal,
 ```
 install.packages('IRkernel')
 ```
