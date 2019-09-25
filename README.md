@@ -1,5 +1,7 @@
 # Introduction to Computational Social Science
 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/5harad/css/master)
+
 Course website: https://5harad.com/mse231/
 
 Please follow the instructions below to ensure that your computing setup is sufficient for the course.

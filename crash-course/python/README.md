@@ -1,5 +1,12 @@
-# Python crash course for MS&E231
-- Link to notes on Piazza
-- Make sure you have:
-  - python 3.6+
-  - spyder (make sure it works!)
+# Introduction to Python
+A brief introduction to `python` in four sections:
+
+1. `python` scripting in the interpreter
+1. `python` development
+  1. control flow and various data structures
+  1. functions and modules
+  1. classes
+
+## Directories
+- `handouts/`: Jupyter notebook files
+- `solutions/`: solutions to each exercise as commented, independent `python` scripts
