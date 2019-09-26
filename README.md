@@ -8,7 +8,7 @@ Please follow the instructions below to ensure that your computing setup is suff
 
 ## Computing environment setup
 
-A Unix-like setup is required (e.g., Linux, OS X, or [Cygwin](https://www.cygwin.com/)). We primarily use [R](http://www.r-project.org/) ([RStudio](https://www.rstudio.com/) is recommended) and Python 3.7 ([Anaconda Python](https://www.anaconda.com/distribution/#download-section) is recommended). We use the [Tidyverse](https://www.tidyverse.org/) suite of packages in R for data manipulation and visualization. We also use [Vowpal Wabbit](https://vowpalwabbit.org/) (a fast online learning algorithm), and [Amazon Elastic MapReduce](https://aws.amazon.com/elasticmapreduce/) (a web service for distributed computing).
+A Unix-like setup is required (e.g., Linux, OS X, or [Cygwin](https://www.cygwin.com/)). We primarily use [R](http://www.r-project.org/) ([RStudio](https://www.rstudio.com/) is recommended) and Python 3.7 ([direct download](https://www.python.org/downloads/) works; you can install [Anaconda Python](https://www.anaconda.com/distribution/#download-section) instead if you desire). We use the [Tidyverse](https://www.tidyverse.org/) suite of packages in R for data manipulation and visualization. We also use [Vowpal Wabbit](https://vowpalwabbit.org/) (a fast online learning algorithm), and [Amazon Elastic MapReduce](https://aws.amazon.com/elasticmapreduce/) (a web service for distributed computing).
 
 ## JupyterLab installation
 
