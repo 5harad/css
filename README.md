@@ -14,7 +14,7 @@ A Unix-like setup is required (e.g., Linux, OS X, or [Cygwin](https://www.cygwin
 
 [JupyterLab](https://jupyter.org/install.html), which runs in the browser, can be a convenient way to run Python (and R), and allows interleaving of explanatory text with executable code. We recommend you install JupyterLab with both Python 3 and R kernels.
 
-**Note:** You must already have Python 3 installed in order to proceed.
+**Note:** You must already have Python 3 installed in order to proceed. If you installed the Anaconda distribution in particular, you already have JupyterLab.
 
 Follow the [installation instructions](https://jupyter.org/install.html) (linked above as well) to install JupyterLab, using `conda` or `pip` as appropriate. (`conda` will do if you have Anaconda Python installed.)
 
