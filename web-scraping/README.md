@@ -21,7 +21,9 @@ pip install beautifulsoup4
 ```
 Again, you may want `pip3` and possibly the `--user` option.
 
-### (Optional) Selenium and [Firefox](https://mozilla.org/firefox)
+### Optional extras
+
+If you're interested in exploring more advanced web scraping, you'll probably want Selenium WebDriver and [Firefox](https://mozilla.org/firefox).
 
 ```bash
 pip install selenium
