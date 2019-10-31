@@ -33,3 +33,5 @@ There are many other great pieces of software, among them:
 If you're working with sentiment analysis of online speech, you might consider the [Perspective API](https://perspectiveapi.com/).
 
 One Stanford course with many more resources to check out is [CS 224N](http://web.stanford.edu/class/cs224n/).
+
+Some of the state-of-the-art language understanding methods (as of this writing), if you're interested in keeping up with these sorts of things, are [BERT](https://arxiv.org/abs/1810.04805) and [XLNet](https://arxiv.org/abs/1906.08237).
