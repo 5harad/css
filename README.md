@@ -1,6 +1,6 @@
 # Introduction to Computational Social Science
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/5harad/css/master)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/5harad/css/master?urlpath=lab)
 
 Course website: https://5harad.com/mse231/
 
